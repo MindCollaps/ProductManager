@@ -22,3 +22,10 @@ services:
     image: postgres:15-alpine
     volumes:
       - ./db/:/var/lib/postgresql/data:rw
+      
+  redis:
+    image: redis:7-alpine
+    env_file:
+      - .env
+    volumes:
+      - ./redis:/data:rw
