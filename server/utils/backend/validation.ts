@@ -40,6 +40,6 @@ export const deviceCategoryCreateSchema = z.object({
 
 export const deviceCreateSchema = z.object({
     name: z.string().min(3, 'Device name must be at least 3 characters').max(100, 'Device name must not exceed 100 characters').transform(val => val.trim()),
-    categoryIds: z.array(z.string().uuid('Invalid category ID format')).min(1, 'At least one category ID is required'),
+    categories: z.array(z.string()).min(1, 'At least one category ID is required'),
     description: z.string().max(255, 'Device description must not exceed 255 characters').transform(val => val.trim()).optional(),
 }).strict();

@@ -29,13 +29,7 @@
         >
             <slot name="icon"/>
         </div>
-        <ui-text
-            v-if="$slots.default"
-            class="button_content"
-            type="2b"
-        >
-            <slot name="default"/>
-        </ui-text>
+        <slot name="default"/>
         <div
             v-if="$slots.append"
             class="button_append"

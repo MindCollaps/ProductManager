@@ -2,7 +2,7 @@
     <common-button
         :icon="right ? 'material-symbols:chevron-right' : 'material-symbols:chevron-left'"
         icon-width="30px"
-        type="transparent"
+        type="secondary"
         @click="$emit('click', $event)"
     />
 </template>

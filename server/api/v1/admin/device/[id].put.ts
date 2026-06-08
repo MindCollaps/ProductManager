@@ -5,7 +5,7 @@ export default defineEventHandler(async event => {
         throw createApiError('Device ID is required', 400);
     }
     
-    const device = await prisma.deviceCategory.findUnique({
+    const device = await prisma.device.findUnique({
         where: { id: id },
     });
 
@@ -21,24 +21,35 @@ export default defineEventHandler(async event => {
     }
     
     const updatedData: any = {};
-    
+
     if (validationResult.data.name) {
         updatedData.name = validationResult.data.name;
     }
-    
+
     if (validationResult.data.description) {
         updatedData.description = validationResult.data.description;
     }
-    if (validationResult.data.categoryIds) {
+
+    if (validationResult.data.categories) {
         updatedData.deviceCategories = {
-            set: validationResult.data.categoryIds.map((id: string) => ({ id })),
+            deleteMany: {
+                deviceId: id
+            },
+            create: validationResult.data.categories.map((categoryId: string) => ({
+                category: {
+                    connect: { id: categoryId }
+                }
+            }))
         };
     }
-    
-    const updatedCategory = await prisma.deviceCategory.update({
-        where: { id: id },
-        data: updatedData,
-    });
 
-    return { message: 'Device category updated', data: updatedCategory };
+    const updatedDevice = await prisma.device.update({
+        where: { id: id },
+        data: {
+            updatedAt: new Date(),
+            ...updatedData,
+        },
+    });
+updatedDevice
+    return { message: 'Device category updated', data: updatedDevice };
 });

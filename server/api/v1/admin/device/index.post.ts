@@ -7,15 +7,21 @@ export default defineEventHandler(async event => {
     if (!validationResult.success) {
         throw createApiError('Invalid input', 400, validationResult.error.issues);
     }
+
+    console.log(validationResult.data.categories.map((id: string) => ({ id })));
     
     const newCategory = await prisma.device.create({
         data: { 
             name: validationResult.data.name,
             description: validationResult.data.description,
             deviceCategories: {
-                connect: validationResult.data.categoryIds.map((id: string) => ({ id })),
+            create: validationResult.data.categories.map((categoryId: string) => ({
+                category: {
+                connect: { id: categoryId }
+                }
+            }))
             },
-         },
+        },
     });
     
     return { message: 'Device category created', data: newCategory };
