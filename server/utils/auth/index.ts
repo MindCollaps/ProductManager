@@ -19,7 +19,7 @@ export async function makeUserSession(user: User, event: H3Event<EventHandlerReq
     await makeSession(user.username ?? 'unknown', user.id, event, user.role);
 }
 
-async function makeSession(username: string, userId: string, event: H3Event<EventHandlerRequest>, role: string) {
+async function makeSession(username: string, userId: string, event: H3Event<EventHandlerRequest>, role: UserRole) {
     console.log(`[Auth:MakeSession] Creating session for user: ${ username } (ID: ${ userId }, role: ${ role })`);
 
     let random = createToken(8);
@@ -86,7 +86,7 @@ async function checkJwt(authCookie: string): Promise<H3EventContext['user'] | un
             username: user.username,
             random: jwt.random,
             timeStamp: jwt.iat ?? 0,
-            role: user.role ?? 0,
+            role: user.role,
         };
     }
     catch (error: any) {
@@ -128,7 +128,7 @@ export async function requireAuth(event: H3Event) {
 
 export async function requireAdminAuth(event: H3Event) {
     await requireAuth(event);
-    const admin = event.context.role === UserRole.ADMIN;
+    const admin = event.context.user?.role === UserRole.ADMIN;
 
     if (!admin) {
         throw createApiError('Forbidden', 403);

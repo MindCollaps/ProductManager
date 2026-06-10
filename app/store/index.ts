@@ -38,5 +38,10 @@ export const useStore = defineStore('index', {
                 this.toasts.splice(index, 1);
             }
         },
+        async fetchMe() {
+            const data = await $fetch<WebUser>('/api/v1/users/me');
+            this.me = data;
+            console.log(this.me);
+        }
     },
 });

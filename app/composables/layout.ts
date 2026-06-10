@@ -1,5 +1,6 @@
 import { useStore } from '~/store/index';
 import { colorsList, themesList } from '~/utils/styles';
+import type { WebUser } from '~~/types/user';
 
 const store = useStore();
 
@@ -30,7 +31,7 @@ export const useLayout = () => {
                 ...themeColors,
             })
             .filter(([key]) => key.endsWith('Rgb'))
-            .map(([key, value]) => `--${ key.replace('Rgb', '') }: ${ (value as number[]).join(',') }`)
+            .map(([key, value]) => `--${ key.replace('Rgb', '') }: ${ (value as string) }`)
             .join(';');
 
         return {

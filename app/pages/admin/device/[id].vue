@@ -14,13 +14,9 @@ const route = useRoute();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
 
-const { data: device } = id.value !== 'new'
-    ? useFetch<Device>(`/api/v1/admin/device/${ id.value }`)
-    : { data: ref<Device | null>(null) };
+const { data: device } = useFetch<Device>(`/api/v1/admin/device/${ id.value }`);
 
-const { data: categories } = id.value !== 'new'
-    ? useFetch<DeviceCategory[]>(`/api/v1/admin/device/categories/${ id.value }`)
-    : { data: ref<DeviceCategory[]>([]) };
+const { data: categories } = useFetch<DeviceCategory[]>(`/api/v1/admin/device/categories/${ id.value }`);
 
 const page = ref<EditPage>({
     title: id.value === 'new' ? 'Create Device Type' : 'Edit Device Type',
@@ -29,7 +25,7 @@ const page = ref<EditPage>({
         { label: 'Description', type: 'text', value: '' },
         { label: 'Category', type: 'category', options: [], value: [] },
     ],
-    isNew: id.value === 'new',
+    isNew: true,
 });
 
 watch([device, categories, id], () => {
@@ -57,7 +53,7 @@ function save() {
 
     showToast({
         message: 'Saved',
-    })
+    });
 }
 
 function cancel() {

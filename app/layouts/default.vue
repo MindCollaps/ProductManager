@@ -25,8 +25,13 @@ import ViewLogin from '~/components/view/ViewLogin.vue';
 import ViewVersion from '~/components/view/ViewVersion.vue';
 import ChangelogPopup from '~/components/common/CommonChangelogPopup.vue';
 import { colorsList } from '#imports';
+import type { WebUser } from '~~/types/user';
+import { useStore } from '~/store';
 
 defineSlots<{ default: () => any }>();
+
+const store = useStore();
+store.fetchMe();
 
 useLayout();
 </script>

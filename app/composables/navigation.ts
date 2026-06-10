@@ -23,11 +23,23 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
             icon: 'material-symbols:other-houses',
         },
         {
-            text: 'Wordlist',
-            path: '/wordlist',
-            icon: 'material-symbols:menu-book',
-            hide: !(store.me?.admin || store.me?.developer),
+            text: 'Admin',
+            icon: 'material-symbols:computer',
+            hide: !(store.me?.isAdmin),
+            children: [
+                {
+                    text: 'Devices',
+                    path: '/admin/device',
+                    icon: 'material-symbols:computer',
+                },
+                {
+                    text: 'Categories',
+                    path: '/admin/category',
+                    icon: 'material-symbols:select',
+                },
+            ],
         },
+
     ];
 
     return menu.filter(x => !x.hide).map(x => {

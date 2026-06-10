@@ -21,6 +21,21 @@
                     v-if="field.type === 'category'"
                     v-model="field.value as DeviceCategory[]"
                 >{{ field.label }}</common-category-selector>
+                <ui-input-text
+                    v-if="field.type === 'label'"
+                    v-model="field.value as string"
+                    class="checkbox_text"
+                    :disabled="!page.isNew"
+                >
+                    {{ field.label }}
+                </ui-input-text>
+                <ui-color-picker
+                    v-if="field.type === 'color'"
+                    v-model="field.value as string"
+                    type="color"
+                >
+                    {{ field.label }}
+                </ui-color-picker>
             </template>
         </div>
         <div class="edit-page-controll">
