@@ -43,10 +43,10 @@
                     <ui-button
                         primary-color="warning700"
                         @click="e.onEdit"
-                    >Edit</ui-button><ui-button
+                    ><template #icon><Icon name="material-symbols:edit"/></template></ui-button><ui-button
                         primary-color="error700"
                         @click="e.onDelete"
-                    >Delete</ui-button>
+                    ><template #icon><Icon name="material-symbols:delete"/></template></ui-button>
                 </div>
             </div>
         </div>

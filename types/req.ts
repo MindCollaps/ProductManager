@@ -35,6 +35,7 @@ export const RepairDeviceWithRelations = {
             deviceBrand: true,
         },
     },
+    request: true,
 } satisfies Prisma.RepairDeviceInclude;
 
 export type RepairDeviceWithRelationsType = Prisma.RepairDeviceGetPayload<{

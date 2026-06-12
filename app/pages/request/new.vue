@@ -24,6 +24,8 @@ const alreadyTried = ref('');
 const suspectedIssue = ref('');
 const customerNotes = ref('');
 
+const router = useRouter();
+
 const { showToast } = useToastManager();
 
 async function send() {
@@ -42,6 +44,8 @@ async function send() {
             method: 'POST',
             body: request,
         });
+
+        router.push('/request');
     }
     catch (error: any) {
         showToast({

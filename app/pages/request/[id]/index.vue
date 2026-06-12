@@ -6,9 +6,13 @@
         <ui-status :status="repairReq?.status"/>
         <div class="request-container">
             <div class="request-customer">
-                <h2>Customer details</h2>
-                {{ repairReq?.customer.displayName }} ({{ repairReq?.customer.username }}) /
-                {{ repairReq?.customer.email }}
+                <h2>Assigned Staff</h2>
+                <template v-if="repairReq.assignedStaff">
+                    {{ repairReq.assignedStaff.displayName }}
+                </template>
+                <template v-else>
+                    <h3>Noch niemand</h3>
+                </template>
                 <ui-button>Chat (WIP)</ui-button>
             </div>
             <div class="request-params">
@@ -41,68 +45,40 @@
             <div class="request-device">
                 <h2>Repair Device</h2>
                 <div
-                    v-if="!repairReq.device"
-                    class="request-device-create"
-                >
-                    Noch kein Device erstellt
-                    <ui-button @click="isVisible = true">Create</ui-button>
-                    <common-popup
-                        :is-visible="isVisible"
-                        @close="isVisible = false"
-                        @submit="onSubmit()"
-                    >
-                        <div class="request-device_popup-container">
-                            <div
-                                v-for="d in devices"
-                                :key="d.id"
-                                class="request-device_popup"
-                            >
-                                {{ d.name }}
-                                <ui-button @click="selectedDevice?.id === d.id ? selectedDevice = null : selectedDevice = d">{{ d.id === selectedDevice?.id ? 'Unselect' : 'Select' }}</ui-button>
-                            </div>
-                        </div>
-                    </common-popup>
-                </div>
-                <div
-                    v-else
+                    v-if="repairDevice"
                     class="request-device-container"
                 >
-                    <ui-input-text v-model="displayName">Display Name</ui-input-text>
-                    <ui-input-text v-model="serialNumber">Serial Number</ui-input-text>
-                    <ui-text-area v-model="notes">Notes</ui-text-area>
-                    <ui-button @click="saveRepaiDevice()">Save</ui-button>
-                    <h3>Device</h3>
+                    <ui-labeled-text :value="repairDevice?.displayName">Display Name</ui-labeled-text>
+                    <ui-labeled-text :value="repairDevice?.serialNumber">Serial Number</ui-labeled-text>
                     <ui-labeled-text :value="repairDevice?.device?.name">Name</ui-labeled-text>
                     <ui-labeled-text :value="repairDevice?.device?.deviceBrand.name">Brand</ui-labeled-text>
                     <ui-labeled-text :value="(repairDevice?.device?.purchaseValue ?? '') as string">Neukaufwert</ui-labeled-text>
+                    <ui-labeled-text :value="repairDevice?.notes">Notes</ui-labeled-text>
                 </div>
+                <template v-else>
+                    <h3>Noch nicht erstellt</h3>
+                </template>
             </div>
             <div class="request-steps">
                 <h2>Request steps</h2>
-                <ui-button @click="router.push(`/staff/request/${ id }/steps`)">Create</ui-button>
             </div>
         </div>
     </common-page>
 </template>
 
 <script lang="ts" setup>
-import type { Device } from '@prisma/client';
 import LabeledText from '~/components/ui/LabeledText.vue';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
 
 const route = useRoute();
-const router = useRouter();
 const id = route.params.id as string;
-const isVisible = ref(false);
 
 const displayName = ref('');
 const serialNumber = ref('');
 const notes = ref('');
-const selectedDevice: Ref<Device | null> = ref(null);
 
-const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/staff/request/${ id }`);
-const { data: devices } = useFetch<Device[]>('/api/v1/staff/device');
-const { data: repairDevice, refresh: refreshRepDevice } = useFetch<RepairDeviceWithRelationsType>(`/api/v1/staff/repair-device/${ repairReq.value?.device?.id }`);
+const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/user/request/${ id }`);
+const { data: repairDevice } = useFetch<RepairDeviceWithRelationsType>(`/api/v1/user/repair-device/${ repairReq.value?.device?.id }`);
 
 watch([repairDevice], () => {
     if (repairDevice.value) {
@@ -111,32 +87,6 @@ watch([repairDevice], () => {
         notes.value = repairDevice.value.notes ?? '';
     }
 });
-
-async function onSubmit() {
-    if (selectedDevice.value && repairReq.value) {
-        isVisible.value = false;
-        await $fetch('/api/v1/staff/repair-device', {
-            method: 'POST',
-            body: {
-                deviceId: selectedDevice.value.id,
-                displayName: selectedDevice.value.name,
-                requestId: repairReq.value.id,
-            },
-        });
-        refreshRepDevice();
-    }
-}
-
-async function saveRepaiDevice() {
-    await $fetch(`/api/v1/staff/repair-device/${ repairDevice.value?.id }`, {
-        method: 'PUT',
-        body: {
-            displayName: displayName.value,
-            serialNumber: serialNumber.value,
-            notes: notes.value,
-        },
-    });
-}
 </script>
 
 <style lang="scss" scoped>

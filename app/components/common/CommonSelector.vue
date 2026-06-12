@@ -13,7 +13,10 @@
             class="selector_container"
             @click="searchTextRef?.focus()"
         >
-            <template v-for="item in selectedItems">
+            <template
+                v-for="item in selectedItems"
+                :key="item.id"
+            >
                 <ui-button @click="removeItem(item)">Remove</ui-button>
                 <slot
                     :item="item"
@@ -38,7 +41,10 @@
             class="selector_select"
         >
             <div class="selector_select_centerbox">
-                <template v-for="item in showAll ? leftEntries : searchEntries">
+                <template
+                    v-for="item in showAll ? leftEntries : searchEntries"
+                    :key="item.id"
+                >
                     <div class="selector_select_controll">
                         <ui-button @click="addItem(item)">Add</ui-button>
                         <slot
