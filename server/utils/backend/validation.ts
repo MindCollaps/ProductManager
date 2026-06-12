@@ -42,18 +42,28 @@ export const deviceCreateSchema = z.object({
     name: z.string().min(3, 'Device name must be at least 3 characters').max(100, 'Device name must not exceed 100 characters').transform(val => val.trim()),
     categories: z.array(z.string()).min(1, 'At least one category ID is required'),
     description: z.string().max(255, 'Device description must not exceed 255 characters').transform(val => val.trim()).optional(),
+    deviceBrandId: z.string(),
+    purchaseValue: z.number(),
 }).strict();
 
 export const requestCreateSchema = z.object({
-    deviceName: z.string().min(3, 'Device name must be at least 3 characters').max(100, 'Device name must not exceed 100 characters').transform(val => val.trim()),
-    deviceModel: z.string().min(3, 'Device model must be at least 3 characters').max(100, 'Device model must not exceed 100 characters').transform(val => val.trim()).optional(),
-    deviceBrand: z.string().min(3, 'Device brand must be at least 3 characters').max(100, 'Device brand must not exceed 100 characters').transform(val => val.trim()).optional(),
+    deviceName: z.string().max(100, 'Device name must not exceed 100 characters').transform(val => val.trim()),
+    deviceModel: z.string().max(100, 'Device model must not exceed 100 characters').transform(val => val.trim()).optional(),
+    deviceBrand: z.string().max(100, 'Device brand must not exceed 100 characters').transform(val => val.trim()).optional(),
     problemDescription: z.string().min(10, 'Problem desciption must be at least 10 characters').max(250, 'Problem desciption must not exceed 250 characters').transform(val => val.trim()),
     alreadyTried: z.string().min(3, 'Already tried must be at least 3 characters').max(250, 'Already tried must not exceed 250 characters').transform(val => val.trim()).optional(),
     suspectedIssue: z.string().min(3, 'Suspected issue must be at least 3 characters').max(250, 'Suspected issue must not exceed 250 characters').transform(val => val.trim()).optional(),
-    customerNotes: z.string().min(3, 'Customer notes must be at least 3 characters').max(250, 'Customer notes must not exceed 250 characters').transform(val => val.trim()).optional(),
+    customerNotes: z.string().max(250, 'Customer notes must not exceed 250 characters').transform(val => val.trim()).optional(),
 });
 
 export const deviceBrandCreateSchema = z.object({
     name: z.string().min(3, 'Device category name must be at least 3 characters').max(50, 'Device category name must not exceed 50 characters').transform(val => val.trim()),
+}).strict();
+
+export const repairDeviceCreateSchema = z.object({
+    displayName: z.string().max(100, 'Display name must not exceed 100 characters').transform(val => val.trim()),
+    serialNumber: z.string().max(100, 'Serialnumber must not exceed 100 characters').transform(val => val.trim()).optional(),
+    notes: z.string().max(250, 'Notes must not exceed 250 characters').transform(val => val.trim()).optional(),
+    deviceId: z.string(),
+    requestId: z.string(),
 }).strict();

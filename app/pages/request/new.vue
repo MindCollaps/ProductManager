@@ -31,7 +31,7 @@ async function send() {
         const request = {
             deviceName: deviceName.value,
             deviceModel: deviceModel.value.length === 0 ? undefined : deviceModel.value,
-            deviceBrand: deviceBrand.value.length ? undefined : deviceBrand.value,
+            deviceBrand: deviceBrand.value.length === 0 ? undefined : deviceBrand.value,
             problemDescription: problemDesciption.value,
             alreadyTried: alreadyTried.value.length === 0 ? undefined : alreadyTried.value,
             suspectedIssue: suspectedIssue.value.length === 0 ? undefined : suspectedIssue.value,

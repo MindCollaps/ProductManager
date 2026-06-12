@@ -1,3 +1,4 @@
+import { RepairRequestWithRelations } from '~~/types/req';
 import { crud } from '../../../../utils/backend/crud';
 
 export default crud(prisma.repairRequest, {
@@ -5,21 +6,7 @@ export default crud(prisma.repairRequest, {
     list: {
         run: async () => prisma.repairRequest.findMany({
             orderBy: { queuePosition: 'asc' },
-            include: {
-                device: {
-                    include: {
-                        device: {
-                            include: {
-                                deviceCategories: {
-                                    include: {
-                                        category: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
+            include: RepairRequestWithRelations,
         }),
     },
 });

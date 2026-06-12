@@ -5,12 +5,12 @@ import { pickTruthyFields } from '~~/server/utils/backend/routeHelpers';
 export default crud(prisma.deviceCategory, {
     resourceName: 'Device category',
     get: {
-        run: async ({ record }: { record: unknown }) => record,
+        run: async ({ record }) => record,
     },
     update: {
         schema: deviceCategoryCreateSchema.partial(),
         notFoundMessage: 'Device category not found',
-        run: async ({ id, body }: { id: string; body: { name?: string; slug?: string; description?: string; color?: string } }) => {
+        run: async ({ id, body }) => {
             const updatedCategory = await prisma.deviceCategory.update({
                 where: { id },
                 data: pickTruthyFields({

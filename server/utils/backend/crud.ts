@@ -1,7 +1,8 @@
-import { getMethod } from 'h3';
-
 import { createApiError } from '~~/server/utils/apiResponses';
 import { findRecordOrThrow, getValidatedBody } from '~~/server/utils/backend/routeHelpers';
+import type { H3Event } from 'h3';
+import type { Prisma } from '@prisma/client';
+import type { z } from 'zod';
 
 function getRecordNotFoundMessage(config: any) {
     return config.update?.notFoundMessage ||
@@ -10,9 +11,74 @@ function getRecordNotFoundMessage(config: any) {
         `${ config.resourceName } not found`;
 }
 
-export function crud(model: any, config: any) {
+type CrudModel = {
+    findUnique: (...args: any[]) => any;
+    findMany: (...args: any[]) => any;
+    create: (...args: any[]) => any;
+    update: (...args: any[]) => any;
+    delete: (...args: any[]) => any;
+};
+
+type MaybePromise<T> = T | Promise<T>;
+
+type CrudRecord<TModel, TInclude = undefined> = Prisma.Result<
+    TModel,
+    [TInclude] extends [undefined] ? object : { include: TInclude },
+    'findUnique'
+>;
+
+type CrudBaseRecord<TModel> = Prisma.Result<TModel, object, 'findUnique'>;
+
+type CrudBody<TSchema extends z.ZodTypeAny> = z.infer<TSchema>;
+
+type CrudListConfig<TModel> = {
+    run: (args: { event: H3Event; model: TModel }) => MaybePromise<unknown>;
+};
+
+type CrudGetConfig<TModel, TInclude = undefined> = {
+    include?: TInclude;
+    notFoundMessage?: string;
+    run: (args: { event: H3Event; model: TModel; id: string; record: CrudRecord<TModel, TInclude> }) => MaybePromise<unknown>;
+};
+
+type CrudCreateConfig<TModel, TSchema extends z.ZodTypeAny> = {
+    schema: TSchema;
+    before?: (args: { event: H3Event; model: TModel; body: CrudBody<TSchema> }) => MaybePromise<void>;
+    run: (args: { event: H3Event; model: TModel; body: CrudBody<TSchema> }) => MaybePromise<unknown>;
+};
+
+type CrudUpdateConfig<TModel, TSchema extends z.ZodTypeAny> = {
+    schema: TSchema;
+    notFoundMessage?: string;
+    before?: (args: { event: H3Event; model: TModel; id: string; record: CrudBaseRecord<TModel>; body: CrudBody<TSchema> }) => MaybePromise<void>;
+    run: (args: { event: H3Event; model: TModel; id: string; record: CrudBaseRecord<TModel>; body: CrudBody<TSchema> }) => MaybePromise<unknown>;
+};
+
+type CrudDeleteConfig<TModel> = {
+    notFoundMessage?: string;
+    before?: (args: { event: H3Event; model: TModel; id: string; record: CrudBaseRecord<TModel> }) => MaybePromise<void>;
+    run: (args: { event: H3Event; model: TModel; id: string; record: CrudBaseRecord<TModel> }) => MaybePromise<unknown>;
+};
+
+type CrudConfig<TModel, TGetInclude = undefined, TCreateSchema extends z.ZodTypeAny | undefined = undefined, TUpdateSchema extends z.ZodTypeAny | undefined = undefined> = {
+    resourceName: string;
+    list?: CrudListConfig<TModel>;
+    get?: CrudGetConfig<TModel, TGetInclude>;
+    create?: TCreateSchema extends z.ZodTypeAny ? CrudCreateConfig<TModel, TCreateSchema> : never;
+    update?: TUpdateSchema extends z.ZodTypeAny ? CrudUpdateConfig<TModel, TUpdateSchema> : never;
+    delete?: CrudDeleteConfig<TModel>;
+};
+
+export type { CrudBaseRecord, CrudBody, CrudConfig, CrudRecord };
+
+export function crud<
+    TModel extends CrudModel,
+    TGetInclude = undefined,
+    TCreateSchema extends z.ZodTypeAny | undefined = undefined,
+    TUpdateSchema extends z.ZodTypeAny | undefined = undefined,
+>(model: TModel, config: CrudConfig<TModel, TGetInclude, TCreateSchema, TUpdateSchema>) {
     return defineEventHandler(async event => {
-        const method = getMethod(event).toUpperCase();
+        const method = event.method.toUpperCase();
         const { id } = event.context.params || {};
 
         if (!id) {
@@ -66,12 +132,18 @@ export function crud(model: any, config: any) {
                 return record;
             }
 
-            const record = await findRecordOrThrow(
-                () => model.findUnique({
-                    where: { id },
-                    include: config.get.include,
-                }),
-                config.get.notFoundMessage || `${ config.resourceName } not found`,
+            const getConfig = config.get;
+
+            const record = await findRecordOrThrow<CrudRecord<TModel, TGetInclude>>(
+                () => model.findUnique(getConfig.include
+                    ? {
+                        where: { id },
+                        include: getConfig.include,
+                    }
+                    : {
+                        where: { id },
+                    }),
+                getConfig.notFoundMessage || `${ config.resourceName } not found`,
             );
 
             return config.get.run({
@@ -82,7 +154,7 @@ export function crud(model: any, config: any) {
             });
         }
 
-        const record = await findRecordOrThrow(
+        const record = await findRecordOrThrow<CrudBaseRecord<TModel>>(
             () => model.findUnique({
                 where: { id },
             }),

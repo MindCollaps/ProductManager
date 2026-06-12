@@ -14,9 +14,9 @@
                 :width="button.width"
                 @click="button.action?.()"
             >
-            <template #icon>
-                <Icon :name="button.icon as string"/>
-            </template>
+                <template #icon>
+                    <Icon :name="button.icon as string"/>
+                </template>
                 <div class="header__menu_btn">
                     <div class="header__menu_btn_text">
                         {{ button.text }}
@@ -44,9 +44,9 @@
                     :type="childrenButton.active ? 'primary' : 'secondary'"
                     @click="childrenButton.action?.()"
                 >
-                <template #icon>
-                    <Icon :name="childrenButton.icon as string"/>
-                </template>
+                    <template #icon>
+                        <Icon :name="childrenButton.icon as string"/>
+                    </template>
                     {{ childrenButton.text }}
                 </ui-button>
             </div>

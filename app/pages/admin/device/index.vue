@@ -20,7 +20,7 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                 const confirmer = confirm(`Bist du sicher dass du ${ device.name } Loeschen willst?`);
 
                 if (confirmer) {
-                    $fetch(`/api/v1/admin/device/${ device.id }`, {
+                    $fetch(`/api/v1/staff/device/${ device.id }`, {
                         method: 'DELETE',
                     });
                     refreshDevices();

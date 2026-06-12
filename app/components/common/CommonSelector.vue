@@ -13,13 +13,13 @@
             class="selector_container"
             @click="searchTextRef?.focus()"
         >
-        <template v-for="item in selectedItems">
-            <ui-button @click="removeItem(item)">Remove</ui-button>
-            <slot
-                :item="item"
-                name="remove"
-            />
-        </template>
+            <template v-for="item in selectedItems">
+                <ui-button @click="removeItem(item)">Remove</ui-button>
+                <slot
+                    :item="item"
+                    name="remove"
+                />
+            </template>
             <icon
                 name="material-symbols:arrow-drop-down"
                 :size="22"
@@ -41,10 +41,10 @@
                 <template v-for="item in showAll ? leftEntries : searchEntries">
                     <div class="selector_select_controll">
                         <ui-button @click="addItem(item)">Add</ui-button>
-                    <slot
-                    :item="item"
-                    name="add"
-                />
+                        <slot
+                            :item="item"
+                            name="add"
+                        />
                     </div>
                 </template>
                 {{ searchEntries?.length === 0 ? 'Nothing found' : '' }}
@@ -71,7 +71,7 @@ const props = defineProps({
     one: {
         type: Boolean,
         default: false,
-    }
+    },
 });
 
 defineSlots<{
@@ -94,9 +94,10 @@ const searchEntries = computed(() => leftEntries.value?.filter(e => e.name.toLow
 const showAll = ref(false);
 
 function addItem(c: T) {
-    if(props.one) {
+    if (props.one) {
         selectedItems.value = [c];
-    } else {
+    }
+    else {
         selectedItems.value.push(c);
     }
 }
@@ -160,10 +161,10 @@ function removeItem(c: T) {
         flex-direction: column;
         align-items: center;
 
+        width: 100%;
         margin-top: 8px;
         border: 2px solid transparent;
         border-radius: 8px;
-        width: 100%;
 
         background: $darkgray900;
 
@@ -177,9 +178,9 @@ function removeItem(c: T) {
 
         &_controll {
             display: flex;
-            justify-content: center;
-            align-items: center;
             gap: 16px;
+            align-items: center;
+            justify-content: center;
         }
 
         &_centerbox {
@@ -187,8 +188,8 @@ function removeItem(c: T) {
             flex-direction: column;
             gap: 8px;
             align-items: start;
-            width: 100%;
 
+            width: 100%;
             width: fit-content;
         }
     }

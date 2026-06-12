@@ -12,10 +12,11 @@
 
 <script lang="ts" setup>
 import { RepairRequestStatus } from '@prisma/client';
+import type { PropType } from 'vue';
 
 defineProps({
     status: {
-        type: Object as PropType<RepairRequestStatus>,
+        type: String as PropType<RepairRequestStatus>,
     },
 });
 

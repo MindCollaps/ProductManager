@@ -6,12 +6,12 @@ export default crud(prisma.device, {
     resourceName: 'Device',
     get: {
         include: DeviceWithRelations,
-        run: async ({ record }: { record: unknown }) => record,
+        run: async ({ record }) => record,
     },
     update: {
         schema: deviceCreateSchema.partial(),
         notFoundMessage: 'Device not found',
-        run: async ({ id, body }: { id: string; body: { name?: string; description?: string; categories?: string[] } }) => {
+        run: async ({ id, body }) => {
             const updatedData: Record<string, unknown> = {};
 
             if (body.name) {

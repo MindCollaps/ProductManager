@@ -10,7 +10,7 @@ export default crud(prisma.deviceBrand, {
     },
     create: {
         schema: deviceBrandCreateSchema,
-        run: async ({ body }: { body: { name: string } }) => {
+        run: async ({ body }) => {
             const newBrand = await prisma.deviceBrand.create({
                 data: {
                     name: body.name,

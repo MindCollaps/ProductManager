@@ -24,12 +24,14 @@
 </template>
 
 <script setup lang="ts">
+import type { PropType } from 'vue';
+
 const props = defineProps({
     icon: {
         type: String,
     },
     value: {
-        type: Object as PropType<string | undefined | null>,
+        type: String as PropType<string | undefined | null>,
     },
 });
 

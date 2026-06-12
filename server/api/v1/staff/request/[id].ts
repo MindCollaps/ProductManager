@@ -1,8 +1,10 @@
 import { crud } from '../../../../utils/backend/crud';
+import { RepairRequestWithRelations } from '~~/types/req';
 
 export default crud(prisma.repairRequest, {
     resourceName: 'Request',
     get: {
-        run: async ({ record }: { record: unknown }) => record,
+        include: RepairRequestWithRelations,
+        run: async ({ record }) => record,
     },
 });

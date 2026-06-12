@@ -13,11 +13,16 @@
             <ui-labeled-text :value="r.suspectedIssue">Suspected issue</ui-labeled-text>
             <ui-button :href="`/staff/request/${ r.id }`">Details</ui-button>
         </div>
+        <common-box v-if="req?.length === 0">
+            <h2>Bisher keine Anfragen</h2>
+        </common-box>
     </div>
 </template>
 
 <script lang="ts" setup>
-const { data: req } = useFetch('/api/v1/staff/request');
+import type { RepairRequestWithRelationsType } from '~~/types/req';
+
+const { data: req } = useFetch<RepairRequestWithRelationsType[]>('/api/v1/staff/request');
 </script>
 
 <style lang="scss" scoped>

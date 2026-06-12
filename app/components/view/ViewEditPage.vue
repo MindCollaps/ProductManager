@@ -38,8 +38,8 @@
                 <common-selector
                     v-if="field.type === 'brand'"
                     v-model="field.value as DeviceBrand[]"
-                    path="/api/v1/admin/brand"
                     one
+                    path="/api/v1/admin/brand"
                 >
                     <template
                         #add="{ item }"

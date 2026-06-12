@@ -11,7 +11,7 @@ export const RepairRequestWithRelations = {
     partOrders: { include: { catalogPart: true } },
 } satisfies Prisma.RepairRequestInclude;
 
-export type RepairRequestWithRelations = Prisma.RepairRequestGetPayload<{
+export type RepairRequestWithRelationsType = Prisma.RepairRequestGetPayload<{
     include: typeof RepairRequestWithRelations;
 }>;
 
@@ -25,6 +25,18 @@ export const DeviceWithRelations = {
     deviceBrand: true,
 } satisfies Prisma.DeviceInclude;
 
-export type DeviceWithRelations = Prisma.DeviceGetPayload<{
+export type DeviceWithRelationsType = Prisma.DeviceGetPayload<{
     include: typeof DeviceWithRelations;
+}>;
+
+export const RepairDeviceWithRelations = {
+    device: {
+        include: {
+            deviceBrand: true,
+        },
+    },
+} satisfies Prisma.RepairDeviceInclude;
+
+export type RepairDeviceWithRelationsType = Prisma.RepairDeviceGetPayload<{
+    include: typeof RepairDeviceWithRelations;
 }>;

@@ -8,7 +8,7 @@
             :style="{
                 '--category-color': category?.color ?? '$lightgray300',
             }"
-        ></div>
+        />
         {{ category?.slug }}
     </div>
 </template>

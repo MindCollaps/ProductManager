@@ -10,7 +10,7 @@ export default crud(prisma.deviceCategory, {
     },
     create: {
         schema: deviceCategoryCreateSchema,
-        run: async ({ body }: { body: { name: string; slug: string; description?: string; color?: string } }) => {
+        run: async ({ body }) => {
             const existingCategory = await prisma.deviceCategory.findUnique({
                 where: { slug: body.slug },
             });
