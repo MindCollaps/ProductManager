@@ -73,7 +73,7 @@ const workItemTypes = [
         description: 'Gerät äußerlich und intern auf Auffälligkeiten prüfen.',
         color: '#0EA5E9',
         icon: 'material-symbols:visibility',
-        sortOrder: 20,
+        sortOrder: 10,
         isSystem: true,
     },
     {
@@ -91,7 +91,7 @@ const workItemTypes = [
         description: 'Defekte Komponenten durch Ersatzteile ersetzen.',
         color: '#22C55E',
         icon: 'material-symbols:components-exchange',
-        sortOrder: 40,
+        sortOrder: 30,
         isSystem: true,
     },
     {
@@ -100,7 +100,7 @@ const workItemTypes = [
         description: 'Akkus oder Batterien ersetzen.',
         color: '#EAB308',
         icon: 'material-symbols:battery-charging-full',
-        sortOrder: 50,
+        sortOrder: 30,
         isSystem: true,
     },
     {
@@ -109,7 +109,7 @@ const workItemTypes = [
         description: 'Staub, Schmutz oder Flüssigkeitsschäden behandeln.',
         color: '#14B8A6',
         icon: 'material-symbols:sanitize',
-        sortOrder: 60,
+        sortOrder: 90,
         isSystem: true,
     },
     {
@@ -118,7 +118,7 @@ const workItemTypes = [
         description: 'Softwareprobleme, Updates oder Wiederherstellungen durchführen.',
         color: '#8B5CF6',
         icon: 'material-symbols:code',
-        sortOrder: 70,
+        sortOrder: 90,
         isSystem: true,
     },
     {
@@ -127,7 +127,7 @@ const workItemTypes = [
         description: 'Abschließende Funktionstests und Kontrolle.',
         color: '#64748B',
         icon: 'material-symbols:check-circle',
-        sortOrder: 80,
+        sortOrder: 90,
         isSystem: true,
     },
     {
@@ -136,7 +136,7 @@ const workItemTypes = [
         description: 'Freier Arbeitsschritt für individuelle Fälle.',
         color: '#111827',
         icon: 'material-symbols:add',
-        sortOrder: 90,
+        sortOrder: 0,
         isSystem: false,
     },
 ];

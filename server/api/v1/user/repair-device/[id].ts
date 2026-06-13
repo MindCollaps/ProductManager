@@ -24,30 +24,4 @@ export default crud(prisma.repairDevice, {
             return record;
         },
     },
-    update: {
-        schema: repairDeviceCreateSchema.partial(),
-        notFoundMessage: 'Repair Device not found',
-        run: async ({ id, body }) => {
-            const updatedData: Record<string, unknown> = {};
-
-            if (body.displayName) {
-                updatedData.displayName = body.displayName;
-            }
-
-            if (body.serialNumber) {
-                updatedData.serialNumber = body.serialNumber;
-            }
-
-            if (body.notes) {
-                updatedData.notes = body.notes;
-            }
-
-            const updatedDevice = await prisma.repairDevice.update({
-                where: { id },
-                data: updatedData as any,
-            });
-
-            return { message: 'Repair Device updated', data: updatedDevice };
-        },
-    },
 });

@@ -64,6 +64,11 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
                     path: '/admin/brand',
                     icon: 'material-symbols:list',
                 },
+                {
+                    text: 'Work Item Types',
+                    path: '/admin/work-item-type',
+                    icon: 'material-symbols:list',
+                },
             ],
         },
 

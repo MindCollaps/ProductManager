@@ -35,8 +35,8 @@ export async function findRecordOrThrow<T>(finder: () => Promise<T | null>, notF
     return record;
 }
 
-export function pickTruthyFields<T extends Record<string, unknown>>(data: T): Partial<T> {
+export function pickDefinedFields<T extends Record<string, unknown>>(data: T): Partial<T> {
     return Object.fromEntries(
-        Object.entries(data).filter(([, value]) => Boolean(value)),
+        Object.entries(data).filter(([, value]) => value !== undefined),
     ) as Partial<T>;
 }

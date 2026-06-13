@@ -1,4 +1,4 @@
-import type { DeviceWithCategories } from '~~/types/device';
+import type { DeviceWithRelations } from '~~/types/device';
 
 import { crud } from '../../../../utils/backend/crud';
 import { DeviceWithRelations } from '~~/types/req';
@@ -12,7 +12,7 @@ export default crud(prisma.device, {
                 include: DeviceWithRelations,
             });
 
-            return devices as DeviceWithCategories[];
+            return devices as DeviceWithRelations[];
         },
     },
 });

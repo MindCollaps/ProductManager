@@ -67,3 +67,12 @@ export const repairDeviceCreateSchema = z.object({
     deviceId: z.string(),
     requestId: z.string(),
 }).strict();
+
+export const workItemTypeCreateSchema = z.object({
+    name: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
+    slug: z.string().min(3, 'Device category slug must be at least 3 characters').max(50, 'Device category slug must not exceed 50 characters').transform(val => val.trim().toLowerCase()),
+    description: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
+    color: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
+    icon: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
+    sortOrder: z.number().max(100, 'Name must not exceed 100 characters'),
+}).strict();

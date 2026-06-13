@@ -4,11 +4,11 @@
 
 <script setup lang="ts">
 import type { ParametersPage } from '~~/types/components';
-import type { DeviceWithCategories } from '~~/types/device';
+import type { DeviceWithRelationsType } from '~~/types/req';
 
 const router = useRouter();
 
-const { data: devices, refresh: refreshDevices } = useFetch<DeviceWithCategories[]>('/api/v1/admin/device');
+const { data: devices, refresh: refreshDevices } = useFetch<DeviceWithRelationsType[]>('/api/v1/admin/device');
 const params: ComputedRef<ParametersPage> = computed(() => {
     return {
         editable: true,
@@ -34,6 +34,16 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                     label: 'Name',
                     type: 'text',
                     value: device.name,
+                },
+                {
+                    label: 'Brand',
+                    type: 'text',
+                    value: device.deviceBrand.name,
+                },
+                {
+                    label: 'Neukaufpreis',
+                    type: 'text',
+                    value: device.purchaseValue?.toString() ?? '',
                 },
                 {
                     label: '',

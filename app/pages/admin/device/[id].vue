@@ -9,13 +9,13 @@
 <script setup lang="ts">
 import type { EditPage } from '~~/types/components';
 import type { DeviceBrand, DeviceCategory } from '@prisma/client';
-import type { DeviceWithRelations } from '~~/types/req';
+import type { DeviceWithRelationsType } from '~~/types/req';
 
 const route = useRoute();
 const router = useRouter();
 const id = computed(() => route.params.id as string);
 
-const { data: device } = useFetch<DeviceWithRelations>(() => `/api/v1/admin/device/${ id.value }`);
+const { data: device } = useFetch<DeviceWithRelationsType>(() => `/api/v1/admin/device/${ id.value }`);
 
 const page = ref<EditPage>({
     title: 'Create Device Type',

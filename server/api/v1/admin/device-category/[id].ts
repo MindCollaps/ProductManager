@@ -1,6 +1,6 @@
 import { crud } from '../../../../utils/backend/crud';
 import { deviceCategoryCreateSchema } from '~~/server/utils/backend/validation';
-import { pickTruthyFields } from '~~/server/utils/backend/routeHelpers';
+import { pickDefinedFields } from '~~/server/utils/backend/routeHelpers';
 
 export default crud(prisma.deviceCategory, {
     resourceName: 'Device category',
@@ -13,7 +13,7 @@ export default crud(prisma.deviceCategory, {
         run: async ({ id, body }) => {
             const updatedCategory = await prisma.deviceCategory.update({
                 where: { id },
-                data: pickTruthyFields({
+                data: pickDefinedFields({
                     name: body.name,
                     slug: body.slug,
                     description: body.description,

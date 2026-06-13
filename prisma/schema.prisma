@@ -225,15 +225,13 @@ model WorkItemType {
   icon        String?
   sortOrder   Int      @default(0)
   isSystem    Boolean  @default(false)
-  isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   createdBy User?            @relation(fields: [createdById], references: [id], onDelete: SetNull)
   workItems RepairWorkItem[]
 
-  @@index([createdById, isActive])
-  @@index([isActive, sortOrder])
+  @@index([sortOrder])
 }
 
 model RepairMessage {
