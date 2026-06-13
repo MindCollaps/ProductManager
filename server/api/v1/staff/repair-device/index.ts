@@ -16,16 +16,62 @@ export default crud(prisma.repairDevice, {
     },
     create: {
         schema: repairDeviceCreateSchema,
-        run: async ({ body }) => {
-            console.log(JSON.stringify(body));
-            const newDevice = await prisma.repairDevice.create({
-                data: {
-                    displayName: body.displayName,
-                    serialNumber: body.serialNumber,
-                    notes: body.notes,
-                    deviceId: body.deviceId,
-                    requestId: body.requestId,
-                },
+        run: async ({ body, event }) => {
+            const userId = event.context.user?.userId ?? null;
+
+            const newDevice = await prisma.$transaction(async transaction => {
+                const createdRepairDevice = await transaction.repairDevice.create({
+                    data: {
+                        displayName: body.displayName,
+                        serialNumber: body.serialNumber,
+                        notes: body.notes,
+                        deviceId: body.deviceId,
+                        requestId: body.requestId,
+                    },
+                    include: RepairDeviceWithRelations,
+                });
+
+                await transaction.repairRequest.update({
+                    where: { id: body.requestId },
+                    data: {
+                        status: 'ACCEPTED',
+                        acceptedAt: new Date(),
+                    },
+                });
+
+                const existingTypes = await transaction.repairWorkItem.findMany({
+                    where: { requestId: body.requestId },
+                    select: { workItemTypeId: true },
+                });
+
+                const existingTypeIds = new Set(existingTypes.map(item => item.workItemTypeId));
+                const defaultTypes = await transaction.workItemType.findMany({
+                    where: { isDefault: true },
+                    orderBy: { sortOrder: 'asc' },
+                });
+
+                const defaultWorkItems = defaultTypes
+                    .filter(workItemType => !existingTypeIds.has(workItemType.id))
+                    .map(workItemType => ({
+                        requestId: body.requestId,
+                        deviceId: createdRepairDevice.id,
+                        createdById: userId,
+                        assignedStaffId: null,
+                        workItemTypeId: workItemType.id,
+                        title: workItemType.name,
+                        description: workItemType.description,
+                        orderIndex: workItemType.sortOrder,
+                        laborMinutes: workItemType.laborMinutes,
+                        status: 'PENDING' as const,
+                    }));
+
+                if (defaultWorkItems.length > 0) {
+                    await transaction.repairWorkItem.createMany({
+                        data: defaultWorkItems,
+                    });
+                }
+
+                return createdRepairDevice;
             });
 
             return { message: 'Repair Device created', data: newDevice };

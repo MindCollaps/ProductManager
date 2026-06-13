@@ -15,12 +15,15 @@
         </div>
         <common-box v-if="req?.length === 0">
             <h2>Bisher keine Anfragen erstellt</h2>
+            <ui-button @click="router.push('/request/new')">Anfrage Erstellen</ui-button>
         </common-box>
     </div>
 </template>
 
 <script lang="ts" setup>
 import type { RepairRequestWithRelationsType } from '~~/types/req';
+
+const router = useRouter();
 
 const { data: req } = useFetch<RepairRequestWithRelationsType[]>('/api/v1/user/request');
 </script>

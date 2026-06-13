@@ -11,6 +11,9 @@ CREATE TYPE "RepairStatus" AS ENUM ('ON_THE_WAY_TO_SHOP', 'RECEIVED', 'IN_DIAGNO
 CREATE TYPE "PartOrderStatus" AS ENUM ('DRAFT', 'ORDERED', 'SHIPPED', 'RECEIVED', 'INSTALLED', 'CANCELLED');
 
 -- CreateEnum
+CREATE TYPE "RepairWorkItemStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'DONE', 'BLOCKED');
+
+-- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('PENDING', 'SENT', 'FAILED');
 
 -- CreateTable
@@ -155,8 +158,9 @@ CREATE TABLE "WorkItemType" (
     "color" TEXT,
     "icon" TEXT,
     "sortOrder" INTEGER NOT NULL DEFAULT 0,
+    "laborMinutes" INTEGER,
     "isSystem" BOOLEAN NOT NULL DEFAULT false,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -210,10 +214,13 @@ CREATE TABLE "RepairWorkItem" (
     "requestId" TEXT NOT NULL,
     "deviceId" TEXT,
     "createdById" TEXT,
+    "assignedStaffId" TEXT,
     "workItemTypeId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "orderIndex" INTEGER NOT NULL DEFAULT 0,
+    "status" "RepairWorkItemStatus" NOT NULL DEFAULT 'PENDING',
+    "completedAt" TIMESTAMP(3),
     "laborMinutes" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -342,10 +349,7 @@ CREATE UNIQUE INDEX "WorkItemType_name_key" ON "WorkItemType"("name");
 CREATE UNIQUE INDEX "WorkItemType_slug_key" ON "WorkItemType"("slug");
 
 -- CreateIndex
-CREATE INDEX "WorkItemType_createdById_isActive_idx" ON "WorkItemType"("createdById", "isActive");
-
--- CreateIndex
-CREATE INDEX "WorkItemType_isActive_sortOrder_idx" ON "WorkItemType"("isActive", "sortOrder");
+CREATE INDEX "WorkItemType_sortOrder_idx" ON "WorkItemType"("sortOrder");
 
 -- CreateIndex
 CREATE INDEX "RepairMessage_channelId_createdAt_idx" ON "RepairMessage"("channelId", "createdAt");
@@ -367,6 +371,9 @@ CREATE INDEX "RepairWorkItem_requestId_orderIndex_idx" ON "RepairWorkItem"("requ
 
 -- CreateIndex
 CREATE INDEX "RepairWorkItem_deviceId_workItemTypeId_idx" ON "RepairWorkItem"("deviceId", "workItemTypeId");
+
+-- CreateIndex
+CREATE INDEX "RepairWorkItem_assignedStaffId_status_idx" ON "RepairWorkItem"("assignedStaffId", "status");
 
 -- CreateIndex
 CREATE INDEX "PartCatalog_name_manufacturer_idx" ON "PartCatalog"("name", "manufacturer");
@@ -454,6 +461,9 @@ ALTER TABLE "RepairWorkItem" ADD CONSTRAINT "RepairWorkItem_deviceId_fkey" FOREI
 
 -- AddForeignKey
 ALTER TABLE "RepairWorkItem" ADD CONSTRAINT "RepairWorkItem_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RepairWorkItem" ADD CONSTRAINT "RepairWorkItem_assignedStaffId_fkey" FOREIGN KEY ("assignedStaffId") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "RepairWorkItem" ADD CONSTRAINT "RepairWorkItem_workItemTypeId_fkey" FOREIGN KEY ("workItemTypeId") REFERENCES "WorkItemType"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

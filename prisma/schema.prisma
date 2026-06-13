@@ -43,6 +43,13 @@ enum PartOrderStatus {
   CANCELLED
 }
 
+enum RepairWorkItemStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  BLOCKED
+}
+
 enum NotificationStatus {
   PENDING
   SENT
@@ -65,7 +72,8 @@ model User {
   assignedRequests          RepairRequest[]             @relation("AssignedRequests")
   messages                  RepairMessage[]
   notes                     RepairNote[]
-  workItems                 RepairWorkItem[]
+  createdWorkItems          RepairWorkItem[]           @relation("CreatedWorkItems")
+  assignedWorkItems         RepairWorkItem[]           @relation("AssignedWorkItems")
   partOrders                PartOrder[]
   notifications             Notification[]
   uploadedFiles             RepairAttachment[]
@@ -224,7 +232,9 @@ model WorkItemType {
   color       String?
   icon        String?
   sortOrder   Int      @default(0)
+  laborMinutes Int?
   isSystem    Boolean  @default(false)
+  isDefault   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -284,25 +294,30 @@ model RepairNote {
 }
 
 model RepairWorkItem {
-  id             String   @id @default(cuid())
-  requestId      String
-  deviceId       String?
-  createdById    String?
-  workItemTypeId String
-  title          String
-  description    String?
-  orderIndex     Int      @default(0)
-  laborMinutes   Int?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id              String               @id @default(cuid())
+  requestId       String
+  deviceId        String?
+  createdById     String?
+  assignedStaffId String?
+  workItemTypeId  String
+  title           String
+  description     String?
+  orderIndex      Int                  @default(0)
+  status          RepairWorkItemStatus @default(PENDING)
+  completedAt     DateTime?
+  laborMinutes    Int?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
 
-  request      RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
-  device       RepairDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
-  createdBy    User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  workItemType WorkItemType  @relation(fields: [workItemTypeId], references: [id], onDelete: Restrict)
+  request       RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  device        RepairDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  createdBy     User?         @relation("CreatedWorkItems", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedStaff User?         @relation("AssignedWorkItems", fields: [assignedStaffId], references: [id], onDelete: SetNull)
+  workItemType  WorkItemType  @relation(fields: [workItemTypeId], references: [id], onDelete: Restrict)
 
   @@index([requestId, orderIndex])
   @@index([deviceId, workItemTypeId])
+  @@index([assignedStaffId, status])
 }
 
 model PartCatalog {

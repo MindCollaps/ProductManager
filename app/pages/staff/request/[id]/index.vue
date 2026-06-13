@@ -78,8 +78,10 @@
                 </div>
             </div>
             <div class="request-steps">
-                <h2>Request steps</h2>
-                <ui-button @click="router.push(`/staff/request/${ id }/steps`)">Create</ui-button>
+                <repair-step-graph
+                    :editable="true"
+                    :request="repairReq"
+                />
             </div>
         </div>
     </common-page>
@@ -91,7 +93,6 @@ import LabeledText from '~/components/ui/LabeledText.vue';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
 
 const route = useRoute();
-const router = useRouter();
 const id = route.params.id as string;
 const isVisible = ref(false);
 
@@ -99,17 +100,28 @@ const displayName = ref('');
 const serialNumber = ref('');
 const notes = ref('');
 const selectedDevice: Ref<Device | null> = ref(null);
+const repairDevice = ref<RepairDeviceWithRelationsType | null>(null);
 
-const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/staff/request/${ id }`);
+const { data: repairReq, refresh: refreshRepairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/staff/request/${ id }`);
 const { data: devices } = useFetch<Device[]>('/api/v1/staff/device');
-const { data: repairDevice, refresh: refreshRepDevice } = useFetch<RepairDeviceWithRelationsType>(`/api/v1/staff/repair-device/${ repairReq.value?.device?.id }`);
 
-watch([repairDevice], () => {
-    if (repairDevice.value) {
-        displayName.value = repairDevice.value.displayName;
-        serialNumber.value = repairDevice.value.serialNumber ?? '';
-        notes.value = repairDevice.value.notes ?? '';
+async function loadRepairDevice() {
+    if (!repairReq.value?.device?.id) {
+        repairDevice.value = null;
+        return;
     }
+
+    repairDevice.value = await $fetch<RepairDeviceWithRelationsType>(`/api/v1/staff/repair-device/${ repairReq.value.device.id }`);
+
+    displayName.value = repairDevice.value.displayName;
+    serialNumber.value = repairDevice.value.serialNumber ?? '';
+    notes.value = repairDevice.value.notes ?? '';
+}
+
+watch(() => repairReq.value?.device?.id, async () => {
+    await loadRepairDevice();
+}, {
+    immediate: true,
 });
 
 async function onSubmit() {
@@ -123,7 +135,8 @@ async function onSubmit() {
                 requestId: repairReq.value.id,
             },
         });
-        refreshRepDevice();
+        await refreshRepairReq();
+        await loadRepairDevice();
     }
 }
 

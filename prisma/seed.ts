@@ -65,7 +65,9 @@ const workItemTypes = [
         color: '#2563EB',
         icon: 'material-symbols:search',
         sortOrder: 10,
+        laborMinutes: 30,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Sichtprüfung',
@@ -74,7 +76,9 @@ const workItemTypes = [
         color: '#0EA5E9',
         icon: 'material-symbols:visibility',
         sortOrder: 10,
+        laborMinutes: 15,
         isSystem: true,
+        isDefault: true,
     },
     {
         name: 'Löten',
@@ -83,7 +87,9 @@ const workItemTypes = [
         color: '#F97316',
         icon: 'material-symbols:precision-manufacturing',
         sortOrder: 30,
+        laborMinutes: 45,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Teileaustausch',
@@ -92,7 +98,9 @@ const workItemTypes = [
         color: '#22C55E',
         icon: 'material-symbols:components-exchange',
         sortOrder: 30,
+        laborMinutes: 45,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Batteriewechsel',
@@ -101,7 +109,9 @@ const workItemTypes = [
         color: '#EAB308',
         icon: 'material-symbols:battery-charging-full',
         sortOrder: 30,
+        laborMinutes: 20,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Reinigung',
@@ -110,7 +120,9 @@ const workItemTypes = [
         color: '#14B8A6',
         icon: 'material-symbols:sanitize',
         sortOrder: 90,
+        laborMinutes: 15,
         isSystem: true,
+        isDefault: true,
     },
     {
         name: 'Software / Firmware',
@@ -119,7 +131,9 @@ const workItemTypes = [
         color: '#8B5CF6',
         icon: 'material-symbols:code',
         sortOrder: 90,
+        laborMinutes: 30,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Testen',
@@ -128,7 +142,9 @@ const workItemTypes = [
         color: '#64748B',
         icon: 'material-symbols:check-circle',
         sortOrder: 90,
+        laborMinutes: 20,
         isSystem: true,
+        isDefault: false,
     },
     {
         name: 'Custom',
@@ -137,7 +153,9 @@ const workItemTypes = [
         color: '#111827',
         icon: 'material-symbols:add',
         sortOrder: 0,
+        laborMinutes: 10,
         isSystem: false,
+        isDefault: false,
     },
 ];
 
@@ -341,8 +359,9 @@ async function main() {
                 color: workItemType.color,
                 icon: workItemType.icon,
                 sortOrder: workItemType.sortOrder,
+                laborMinutes: workItemType.laborMinutes,
                 isSystem: workItemType.isSystem,
-                isActive: true,
+                isDefault: workItemType.isDefault,
             },
             create: workItemType,
         });

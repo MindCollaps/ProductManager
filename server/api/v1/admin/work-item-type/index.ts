@@ -24,6 +24,8 @@ export default crud(prisma.workItemType, {
                     color: body.color,
                     icon: body.icon,
                     sortOrder: body.sortOrder,
+                    laborMinutes: body.laborMinutes,
+                    isDefault: body.isDefault,
                     createdById: userId,
                 },
             });

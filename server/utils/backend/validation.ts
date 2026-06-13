@@ -75,4 +75,19 @@ export const workItemTypeCreateSchema = z.object({
     color: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
     icon: z.string().max(100, 'Name must not exceed 100 characters').transform(val => val.trim()),
     sortOrder: z.number().max(100, 'Name must not exceed 100 characters'),
+    laborMinutes: z.number().int().min(0).max(480).nullable().default(null),
+    isDefault: z.boolean().default(false),
+}).strict();
+
+export const repairWorkItemStatusSchema = z.enum(['PENDING', 'IN_PROGRESS', 'DONE', 'BLOCKED']);
+
+export const repairWorkItemCreateSchema = z.object({
+    title: z.string().max(100, 'Work item title must not exceed 100 characters').transform(val => val.trim()),
+    description: z.string().max(500, 'Work item description must not exceed 500 characters').transform(val => val.trim()).optional(),
+    orderIndex: z.number().int().min(0).max(100),
+    workItemTypeId: z.string(),
+    assignedStaffId: z.string().nullable().optional(),
+    laborMinutes: z.number().int().min(0).nullable().optional(),
+    status: repairWorkItemStatusSchema.default('PENDING'),
+    completedAt: z.string().datetime().nullable().optional(),
 }).strict();

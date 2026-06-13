@@ -1,5 +1,25 @@
 import type { Prisma } from '@prisma/client';
 
+type WorkItemTypeWithDefault = Prisma.WorkItemTypeGetPayload<{}> & {
+    laborMinutes: number | null;
+    isDefault: boolean;
+};
+
+export const RepairWorkItemWithRelations = {
+    assignedStaff: true,
+    createdBy: true,
+    device: true,
+    workItemType: true,
+} satisfies Prisma.RepairWorkItemInclude;
+
+type PrismaRepairWorkItemWithRelationsType = Prisma.RepairWorkItemGetPayload<{
+    include: typeof RepairWorkItemWithRelations;
+}>;
+
+export type RepairWorkItemWithRelationsType = Omit<PrismaRepairWorkItemWithRelationsType, 'workItemType'> & {
+    workItemType: WorkItemTypeWithDefault;
+};
+
 export const RepairRequestWithRelations = {
     assignedStaff: true,
     attachments: true,
@@ -7,14 +27,23 @@ export const RepairRequestWithRelations = {
     device: true,
     messageChannel: true,
     notes: { include: { author: true } },
-    workItems: { include: { workItemType: true } },
+    workItems: {
+        include: RepairWorkItemWithRelations,
+        orderBy: [
+            { orderIndex: 'asc' },
+            { createdAt: 'asc' },
+        ],
+    },
     partOrders: { include: { catalogPart: true } },
 } satisfies Prisma.RepairRequestInclude;
 
-export type RepairRequestWithRelationsType = Prisma.RepairRequestGetPayload<{
+type PrismaRepairRequestWithRelationsType = Prisma.RepairRequestGetPayload<{
     include: typeof RepairRequestWithRelations;
 }>;
 
+export type RepairRequestWithRelationsType = Omit<PrismaRepairRequestWithRelationsType, 'workItems'> & {
+    workItems: RepairWorkItemWithRelationsType[];
+};
 
 export const DeviceWithRelations = {
     deviceCategories: {

@@ -6,9 +6,11 @@
 import type { WorkItemType } from '@prisma/client';
 import type { ParametersPage } from '~~/types/components';
 
+type WorkItemTypeWithDefault = WorkItemType & { laborMinutes: number | null; isDefault: boolean };
+
 const router = useRouter();
 
-const { data: workItemTypes, refresh: refreshWorkItemTypes } = useFetch<WorkItemType[]>('/api/v1/admin/work-item-type');
+const { data: workItemTypes, refresh: refreshWorkItemTypes } = useFetch<WorkItemTypeWithDefault[]>('/api/v1/admin/work-item-type');
 const params: ComputedRef<ParametersPage> = computed(() => {
     return {
         editable: true,
@@ -59,6 +61,16 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                     label: 'Sort Order',
                     type: 'text',
                     value: workItemType.sortOrder?.toString() ?? '',
+                },
+                {
+                    label: 'Labor Minutes',
+                    type: 'text',
+                    value: workItemType.laborMinutes?.toString() ?? '',
+                },
+                {
+                    label: 'Default Step',
+                    type: 'text',
+                    value: workItemType.isDefault ? 'Yes' : 'No',
                 },
             ],
 

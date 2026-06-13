@@ -2,7 +2,7 @@ import { crud } from '../../../../utils/backend/crud';
 import { workItemTypeCreateSchema } from '~~/server/utils/backend/validation';
 import { pickDefinedFields } from '~~/server/utils/backend/routeHelpers';
 
-export default crud(prisma.device, {
+export default crud(prisma.workItemType, {
     resourceName: 'Work Item Type',
     get: {
         run: async ({ record }) => record,
@@ -18,6 +18,8 @@ export default crud(prisma.device, {
                 description: body.description,
                 icon: body.icon,
                 sortOrder: body.sortOrder,
+                laborMinutes: body.laborMinutes,
+                isDefault: body.isDefault,
             });
 
             const updatedWorkItemType = await prisma.workItemType.update({

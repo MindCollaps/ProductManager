@@ -60,7 +60,10 @@
                 </template>
             </div>
             <div class="request-steps">
-                <h2>Request steps</h2>
+                <repair-step-graph
+                    :editable="false"
+                    :request="repairReq"
+                />
             </div>
         </div>
     </common-page>
@@ -76,16 +79,27 @@ const id = route.params.id as string;
 const displayName = ref('');
 const serialNumber = ref('');
 const notes = ref('');
+const repairDevice = ref<RepairDeviceWithRelationsType | null>(null);
 
 const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/user/request/${ id }`);
-const { data: repairDevice } = useFetch<RepairDeviceWithRelationsType>(`/api/v1/user/repair-device/${ repairReq.value?.device?.id }`);
 
-watch([repairDevice], () => {
-    if (repairDevice.value) {
-        displayName.value = repairDevice.value.displayName;
-        serialNumber.value = repairDevice.value.serialNumber ?? '';
-        notes.value = repairDevice.value.notes ?? '';
+async function loadRepairDevice() {
+    if (!repairReq.value?.device?.id) {
+        repairDevice.value = null;
+        return;
     }
+
+    repairDevice.value = await $fetch<RepairDeviceWithRelationsType>(`/api/v1/user/repair-device/${ repairReq.value.device.id }`);
+
+    displayName.value = repairDevice.value.displayName;
+    serialNumber.value = repairDevice.value.serialNumber ?? '';
+    notes.value = repairDevice.value.notes ?? '';
+}
+
+watch(() => repairReq.value?.device?.id, async () => {
+    await loadRepairDevice();
+}, {
+    immediate: true,
 });
 </script>
 
