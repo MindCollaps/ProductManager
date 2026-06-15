@@ -9,6 +9,7 @@
 <script setup lang="ts">
 import type { EditPage } from '~~/types/components';
 import type { WorkItemType } from '@prisma/client';
+
 type WorkItemTypeWithDefault = WorkItemType & { laborMinutes: number | null; isDefault: boolean };
 
 const route = useRoute();
@@ -75,6 +76,5 @@ function save() {
 function cancel() {
     router.push('/admin/work-item-type');
 }
-
 </script>
 

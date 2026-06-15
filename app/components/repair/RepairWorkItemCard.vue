@@ -1,11 +1,15 @@
 <template>
-    <div class="work-item-card">
+    <div
+        class="work-item-card"
+        :style="cardStyle"
+    >
         <div class="work-item-card-header">
-            <div>
-                <div class="work-item-card-title">{{ item.title }}</div>
-                <div class="work-item-card-subtitle">
-                    {{ item.workItemType.name }} · Order {{ item.orderIndex }}
-                </div>
+            <div class="work-item-card-copy">
+                <div class="work-item-card-order">Order {{ item.orderIndex }}</div>
+                <div class="work-item-card-title"><Icon
+                    v-if="item.workItemType.icon"
+                    :name="item.workItemType.icon"
+                />{{ item.title }}</div>
             </div>
             <repair-work-item-status-badge :status="item.status"/>
         </div>
@@ -29,10 +33,17 @@
             class="work-item-card-actions"
         >
             <ui-button @click="emit('edit')">Edit</ui-button>
-            <ui-button @click="emit('toggle')">
+            <ui-button
+                @click="emit('toggle')"
+            >
                 {{ item.status === 'DONE' ? 'Reopen' : 'Complete' }}
             </ui-button>
-            <ui-button primary-color="error600" @click="emit('delete')">Delete</ui-button>
+            <ui-button
+                primary-color="error600"
+                @click="emit('delete')"
+            >
+                Delete
+            </ui-button>
         </div>
     </div>
 </template>
@@ -64,6 +75,10 @@ const emit = defineEmits({
     },
 });
 
+const cardStyle = computed(() => ({
+    '--accent-color': props.item.workItemType.color ?? 'rgb(148 163 184 / 0.9)',
+}));
+
 const assignedStaffLabel = computed(() => props.item.assignedStaff?.displayName ?? props.item.assignedStaff?.username ?? 'Unassigned');
 </script>
 
@@ -75,6 +90,7 @@ const assignedStaffLabel = computed(() => props.item.assignedStaff?.displayName 
 
     padding: 16px;
     border: 1px solid $lightgray150;
+    border-left: 4px solid var(--accent-color);
     border-radius: 16px;
 
     background: linear-gradient(180deg, rgb(255 255 255 / 3%), rgb(255 255 255 / 1%));
@@ -86,20 +102,45 @@ const assignedStaffLabel = computed(() => props.item.assignedStaff?.displayName 
         justify-content: space-between;
     }
 
+    &-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &-order {
+        width: fit-content;
+        padding: 4px 8px;
+        border: 1px solid $lightgray150;
+        border-radius: 999px;
+
+        font-size: 11px;
+        font-weight: 700;
+        color: $typographyPrimary;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+
+        background: rgb(255 255 255 / 4%);
+    }
+
     &-title {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: center;
+
         font-size: 16px;
         font-weight: 700;
     }
 
-    &-subtitle,
     &-meta {
         font-size: 12px;
-        color: $darkgray700;
+        color: $typographyPrimary;
     }
 
     &-description {
         line-height: 1.4;
-        color: $darkgray900;
+        color: $typographyPrimary;
     }
 
     &-meta {

@@ -43,6 +43,7 @@ const { data: req } = useFetch<RepairRequestWithRelationsType[]>('/api/v1/user/r
         display: flex;
         flex-direction: column;
         padding: 16px;
+        gap: 16px;
     }
 }
 </style>

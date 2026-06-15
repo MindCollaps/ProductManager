@@ -37,9 +37,9 @@ const label = computed(() => statusLabels[props.status]);
 
     font-size: 12px;
     font-weight: 700;
+    color: $darkgray950;
     letter-spacing: 0.02em;
 
-    color: $darkgray950;
     background: $lightgray200;
 
     &[data-status='DONE'] {

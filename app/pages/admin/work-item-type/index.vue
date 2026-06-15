@@ -77,5 +77,4 @@ const params: ComputedRef<ParametersPage> = computed(() => {
         })) ?? [],
     };
 });
-
 </script>

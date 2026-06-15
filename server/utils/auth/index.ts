@@ -4,8 +4,10 @@ import { setAuthCookie, removeAuthCookie, authCookieName } from '~~/server/utils
 import type { User } from '@prisma/client';
 import { createToken } from '../crypto';
 import type { UserSession } from '~~/types/data';
+import type { Socket, DefaultEventsMap } from 'socket.io';
 import { getRedisSync } from '~~/server/utils/backend/redis';
 import { UserRole } from '@prisma/client';
+import cookie from 'cookie';
 
 export const userSessionAvailableMS = 5 * 24 * 60 * 60 * 1000;
 
@@ -123,6 +125,26 @@ export async function requireAuth(event: H3Event) {
             console.warn('[Auth:RequireAuth] Authentication failed');
         }
         throw createApiError('Invalid or expired token', 401);
+    }
+}
+
+export async function parseSocketCookie(socket: Socket<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>): Promise<H3EventContext['user'] | undefined> {
+    const cookies = socket.handshake.headers.cookie;
+    const parsedCookies = cookies ? cookie.parse(cookies) : {};
+
+    const token = parsedCookies[authCookieName];
+
+    if (!token) {
+        throw new Error('Auth token missing in cookie');
+    }
+
+    try {
+        const user = await checkJwt(token);
+        return user;
+    }
+    catch {
+        // invalid token
+        return undefined;
     }
 }
 

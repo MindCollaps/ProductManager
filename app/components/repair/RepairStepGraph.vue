@@ -1,9 +1,8 @@
 <template>
     <div class="step-graph">
         <div class="step-graph-header">
-            <div>
-                <h2>Repair steps</h2>
-                <p>Order 0-100, grouped by phase and editable per step.</p>
+            <div class="step-graph-copy">
+                <h2>Repair flow</h2>
             </div>
 
             <div class="step-graph-actions">
@@ -19,34 +18,55 @@
                 >
                     Add step
                 </ui-button>
+                <ui-button
+                    v-if="!route.path.endsWith('/graph')"
+                    @click="router.push(`/request/${ request.id }/graph`)"
+                >
+                    <template #icon>
+                        <Icon name="material-symbols:fullscreen"/>
+                    </template>
+                </ui-button>
+                <ui-button
+                    v-else
+                    @click="router.back()"
+                >
+                    <template #icon>
+                        <Icon name="material-symbols:fullscreen-exit"/>
+                    </template>
+                </ui-button>
             </div>
         </div>
 
-        <template v-if="phases.length > 0">
-            <repair-step-phase
-                v-for="phase in phases"
-                :key="phase.startOrder"
-                :phase="phase"
-                :editable="editable"
-                @add="openCreate"
-            >
-                <template #default="{ item }">
-                    <repair-work-item-card
-                        :editable="editable"
-                        :item="item"
-                        @delete="deleteWorkItem(item)"
-                        @edit="openEdit(item)"
-                        @toggle="toggleWorkItemCompletion(item)"
-                    />
-                </template>
-            </repair-step-phase>
-        </template>
+        <div class="step-graph-overview">
+            <div class="step-graph-stat">
+                <span class="step-graph-stat-value">{{ completedWorkItems }} / {{ workItems.length }}</span>
+                <span class="step-graph-stat-label">done</span>
+            </div>
+        </div>
 
-        <common-box v-else>
+        <common-box v-if="workItems.length === 0">
             <h3>No repair steps defined yet</h3>
-            <p v-if="editable">Create custom steps or initialize the default baseline steps.</p>
+            <p v-if="editable">Initialize the default baseline steps or add the first custom node to start shaping the flow.</p>
             <p v-else>Steps will appear here once staff defines them.</p>
         </common-box>
+
+        <repair-step-phase
+            v-for="phase in phases"
+            :key="phase.startOrder"
+            :editable="editable"
+            :phase="phase"
+            @add="openCreate"
+        >
+            <template #default="{ item }">
+                <repair-work-item-card
+                    :editable="editable"
+                    :item="item"
+                    @delete="deleteWorkItem(item)"
+                    @edit="openEdit(item)"
+                    @toggle="toggleWorkItemCompletion(item)"
+                />
+            </template>
+        </repair-step-phase>
 
         <repair-work-item-editor
             v-if="editable"
@@ -81,12 +101,15 @@ const workItems = ref<RepairWorkItemWithRelationsType[]>([]);
 const isEditorVisible = ref(false);
 const editingItem = ref<RepairWorkItemWithRelationsType | null>(null);
 const editorDefaultOrderIndex = ref(0);
+const router = useRouter();
+const route = useRoute();
 
 watch(() => props.request.workItems, items => {
     workItems.value = [...(items ?? [])];
 }, { immediate: true });
 
 const phases = computed(() => groupRepairWorkItemsByPhase(workItems.value));
+const completedWorkItems = computed(() => workItems.value.filter(workItem => workItem.status === 'DONE').length);
 
 function closeEditor() {
     isEditorVisible.value = false;
@@ -214,10 +237,17 @@ async function initializeDefaultSteps() {
     flex-direction: column;
     gap: 18px;
 
+    &-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-width: 780px;
+    }
+
     &-header {
         display: flex;
         gap: 16px;
-        align-items: end;
+        align-items: flex-start;
         justify-content: space-between;
     }
 
@@ -226,6 +256,71 @@ async function initializeDefaultSteps() {
         gap: 12px;
         align-items: center;
         justify-content: flex-end;
+    }
+
+    &-overview {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    &-stat {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        padding: 14px 16px;
+        border: 1px solid $lightgray125;
+        border-radius: 16px;
+
+        background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%));
+
+        &-value {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+            color: $typographyPrimary;
+        }
+
+        &-label {
+            font-size: 12px;
+            color: $typographyPrimary;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+    }
+
+    &-legend {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px;
+    }
+
+    &-legend-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        padding: 12px 14px;
+        border: 1px solid $lightgray125;
+        border-radius: 14px;
+
+        background: rgb(255 255 255 / 3%);
+
+        &--empty {
+            opacity: 0.6;
+        }
+    }
+
+    &-legend-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: $typographyPrimary;
+    }
+
+    &-legend-label {
+        font-size: 12px;
+        color: $typographyPrimary;
     }
 }
 </style>
