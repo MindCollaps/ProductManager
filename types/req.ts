@@ -24,7 +24,15 @@ export const RepairRequestWithRelations = {
     assignedStaff: true,
     attachments: true,
     customer: true,
-    device: true,
+    device: {
+        include: {
+            device: {
+                include: {
+                    deviceBrand: true,
+                },
+            },
+        },
+    },
     messageChannel: true,
     statusHistory: {
         orderBy: {

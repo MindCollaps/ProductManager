@@ -1,5 +1,5 @@
 <template>
-    <common-page :title="`Chat · Request ${ requestId }`">
+    <common-page :title="`Chat · ${ repairReq.subject }`">
         <div class="chat-room">
             <div class="chat-room_messages">
                 <div
@@ -64,6 +64,7 @@ import { useStore } from '~/store';
 
 const route = useRoute();
 const requestId = String(route.params.id);
+const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/staff/request/${ requestId }`);
 const store = useStore();
 const { showToast } = useToastManager();
 

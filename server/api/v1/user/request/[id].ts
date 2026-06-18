@@ -1,6 +1,7 @@
 import { crud } from '../../../../utils/backend/crud';
 import { RepairRequestWithRelations } from '~~/types/req';
 import { createApiError } from '~~/server/utils/apiResponses';
+import { UserRole } from '@prisma/client';
 
 export default crud(prisma.repairRequest, {
     resourceName: 'Request',
@@ -17,7 +18,7 @@ export default crud(prisma.repairRequest, {
                 throw createApiError('Request not found', 404);
             }
 
-            if (record.customerId !== customerId) {
+            if (record.customerId !== customerId && event.context.user?.role === UserRole.STAFF) {
                 throw createApiError('Request not found', 404);
             }
 

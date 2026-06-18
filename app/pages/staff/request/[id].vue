@@ -299,8 +299,9 @@ async function setRequestState(status: Extract<RepairRequestStatus, 'CANCELLED' 
 }
 
 async function setRepairStatus(status: RepairStatus) {
-    await syncRequestStateView();
+    if (!repairReq.value) {
         return;
+    }
 
     repairStatusOverride.value = status;
 

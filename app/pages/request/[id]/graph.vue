@@ -10,6 +10,9 @@
             />
         </div>
     </common-page>
+    <common-box v-else>
+        <h2>Loading...</h2>
+    </common-box>
 </template>
 
 <script setup lang="ts">
