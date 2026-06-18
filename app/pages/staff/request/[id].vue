@@ -262,7 +262,7 @@ async function openChat() {
     await navigateTo(`/chat/room/${ repairReq.value.id }`);
 }
 
-async function setRequestState(status: RepairRequestStatus.CANCELLED | RepairRequestStatus.REJECTED | RepairRequestStatus.COMPLETED) {
+async function setRequestState(status: Extract<RepairRequestStatus, 'CANCELLED' | 'REJECTED' | 'COMPLETED'>) {
     if (!repairReq.value) {
         return;
     }
