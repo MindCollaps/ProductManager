@@ -10,7 +10,7 @@ COPY package.json bun.lock tsconfig.json ./
 RUN bun install
 
 COPY . .
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" bun run prisma generate && bun run prepare && node node_modules/nuxt/bin/nuxt.mjs build
+RUN bun run prepare && node node_modules/nuxt/bin/nuxt.mjs build
 
 
 FROM node:20-alpine AS runner
