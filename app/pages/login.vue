@@ -10,6 +10,7 @@
                 input-type="password"
                 @keyup.enter="login"
             >Password</ui-input-text>
+            <ui-button type="link" to="/forgot-password">Forgot password?</ui-button>
             <ui-button @click="login">Login</ui-button>
         </common-box>
     </common-page>
@@ -32,6 +33,14 @@ interface LoginResponse {
     message?: string;
 }
 
+interface FetchErrorLike {
+    data?: {
+        message?: string;
+        statusMessage?: string;
+    };
+    statusMessage?: string;
+}
+
 async function login() {
     try {
         const response = await $fetch<LoginResponse>('/api/v1/auth/login', {
@@ -46,10 +55,12 @@ async function login() {
             router.push(response.redirect);
         }
     }
-    catch (error: any) {
+    catch (error) {
+        const err = error as FetchErrorLike;
+
         showToast({
             mode: ToastMode.Error,
-            message: error.data?.message || error.data?.statusMessage || error.statusMessage || 'Login failed',
+            message: err.data?.message || err.data?.statusMessage || err.statusMessage || 'Login failed',
         });
     }
 }

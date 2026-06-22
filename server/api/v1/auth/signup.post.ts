@@ -1,7 +1,9 @@
 import { createApiError, sendApiResponse } from '~~/server/utils/apiResponses';
-import { makeUserSession } from '~~/server/utils/auth';
+import { createAuthToken } from '~~/server/utils/auth/tokens';
 import { createUser } from '~~/server/utils/backend/user';
 import { checkRateLimit } from '~~/server/utils/backend/rateLimit';
+import { AuthTokenPurpose } from '@prisma/client';
+import { sendAccountVerificationEmail, getMailConfig } from '~~/server/utils/mail';
 
 export default defineEventHandler(async event => {
     const clientIp = getRequestIP(event, { xForwardedFor: true }) || 'unknown';
@@ -34,7 +36,7 @@ export default defineEventHandler(async event => {
 
     console.log(`[Auth:Signup] Creating account for username: ${ username }, email: ${ email } from IP: ${ clientIp }`);
 
-    const result = await createUser(username, email, password, false, false);
+    const result = await createUser(username, email, password, false, false, false);
     if (!result.success || !result.user) {
         switch (result.error) {
             case 'ALREADY_EXISTS':
@@ -50,6 +52,20 @@ export default defineEventHandler(async event => {
     }
 
     console.log(`[Auth:Signup] Successfully created account for user: ${ username } (ID: ${ result.user.id }) from IP: ${ clientIp }`);
-    await makeUserSession(result.user, event);
-    return { message: 'account created!', redirect: '/dashboard' };
+
+    const authToken = await createAuthToken(result.user.id, AuthTokenPurpose.EMAIL_VERIFICATION, 24 * 60);
+    const mailConfig = getMailConfig();
+    const verifyUrl = `${ mailConfig.appBaseUrl }/verify-email?token=${ authToken.token }`;
+
+    try {
+        await sendAccountVerificationEmail(email, username, verifyUrl);
+    }
+    catch (error) {
+        console.error(`[Auth:Signup] Failed to send verification email for user ${ username }`, error);
+    }
+
+    return {
+        message: 'Account created. Please check your email and confirm your account before logging in.',
+        requiresEmailVerification: true,
+    };
 });

@@ -43,7 +43,7 @@ export default defineEventHandler(async event => {
 
         if (!user.isActive) {
             console.warn(`[Auth:Login] Failed login attempt - user: ${ username } from IP: ${ clientIp } user is inactive`);
-            return sendApiResponse(event, 'User is deactivated', 403);
+            return sendApiResponse(event, 'Account is not active yet. Please verify your email first.', 403);
         }
 
         const passwordCorrect = await checkPassword(password, user.passwordHash);
@@ -57,7 +57,7 @@ export default defineEventHandler(async event => {
             return sendApiResponse(event, 'Wrong username or password', 400);
         }
     }
-    catch (error: any) {
+    catch (error) {
         console.error(`[Auth:Login] Database error during login for user: ${ username } from IP: ${ clientIp }`, error);
         throw createApiError('Database error', 500, error);
     }

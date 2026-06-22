@@ -1,6 +1,9 @@
 import { crud } from '../../../../utils/backend/crud';
 import { repairDeviceCreateSchema } from '~~/server/utils/backend/validation';
 import { RepairDeviceWithRelations } from '~~/types/req';
+import { createNotification } from '~~/server/utils/backend/notificationCenter';
+import { sendRequestAcceptedEmail } from '~~/server/utils/mail';
+import { createApiError } from '~~/server/utils/apiResponses';
 
 export default crud(prisma.repairDevice, {
     resourceName: 'Repair Device',
@@ -18,6 +21,24 @@ export default crud(prisma.repairDevice, {
         schema: repairDeviceCreateSchema,
         run: async ({ body, event }) => {
             const userId = event.context.user?.userId ?? null;
+
+            const requestWithCustomer = await prisma.repairRequest.findUnique({
+                where: { id: body.requestId },
+                select: {
+                    customer: {
+                        select: {
+                            id: true,
+                            email: true,
+                            username: true,
+                        },
+                    },
+                    subject: true,
+                },
+            });
+
+            if (!requestWithCustomer) {
+                throw createApiError('Request not found', 404);
+            }
 
             const newDevice = await prisma.$transaction(async transaction => {
                 const createdRepairDevice = await transaction.repairDevice.create({
@@ -73,6 +94,27 @@ export default crud(prisma.repairDevice, {
 
                 return createdRepairDevice;
             });
+
+            await createNotification({
+                userId: requestWithCustomer.customer.id,
+                requestId: body.requestId,
+                subject: 'Your repair request has been accepted',
+                body: 'Your request is now in our processing queue.',
+            });
+
+            const customerName = requestWithCustomer.customer.username ?? requestWithCustomer.customer.email;
+
+            try {
+                await sendRequestAcceptedEmail(
+                    requestWithCustomer.customer.email,
+                    customerName,
+                    requestWithCustomer.subject,
+                    body.requestId,
+                );
+            }
+            catch (error) {
+                console.error('[Mail] Failed to send request accepted email for request', body.requestId, error);
+            }
 
             return { message: 'Repair Device created', data: newDevice };
         },

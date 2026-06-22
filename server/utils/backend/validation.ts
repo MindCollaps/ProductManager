@@ -31,6 +31,20 @@ export const loginSchema = z.object({
     password: z.string().min(3, 'Password must be at least 3 characters').max(64, 'Password must not exceed 64 characters'),
 }).strict();
 
+export const verifyEmailSchema = z.object({
+    token: z.string().min(16, 'Invalid verification token').max(256, 'Invalid verification token'),
+}).strict();
+
+export const passwordResetRequestSchema = z.object({
+    email: z.string().email('Invalid email address').transform(val => val.toLowerCase().trim()),
+}).strict();
+
+export const passwordResetConfirmSchema = z.object({
+    token: z.string().min(16, 'Invalid reset token').max(256, 'Invalid reset token'),
+    password: passwordSchema,
+    passwordRepeated: passwordSchema,
+}).strict();
+
 export const deviceCategoryCreateSchema = z.object({
     name: z.string().min(3, 'Device category name must be at least 3 characters').max(50, 'Device category name must not exceed 50 characters').transform(val => val.trim()),
     slug: z.string().min(3, 'Device category slug must be at least 3 characters').max(50, 'Device category slug must not exceed 50 characters').transform(val => val.trim().toLowerCase()),

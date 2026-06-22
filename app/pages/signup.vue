@@ -41,6 +41,20 @@ const email = ref<string>();
 interface SignupResponse {
     redirect?: string;
     message?: string;
+    requiresEmailVerification?: boolean;
+}
+
+interface ValidationIssue {
+    message: string;
+}
+
+interface FetchErrorLike {
+    data?: {
+        message?: string;
+        statusMessage?: string;
+        data?: ValidationIssue[];
+    };
+    statusMessage?: string;
 }
 
 async function signup() {
@@ -55,16 +69,27 @@ async function signup() {
             }),
         });
 
+        if (response.requiresEmailVerification) {
+            showToast({
+                mode: ToastMode.Success,
+                message: response.message || 'Account created. Please verify your email first.',
+                duration: 9000,
+            });
+            await router.push('/login');
+            return;
+        }
+
         void store.fetchMe();
         if (response.redirect) {
             router.push(response.redirect);
         }
     }
-    catch (error: any) {
-        let message = error.data?.message || error.data?.statusMessage || error.statusMessage || 'Signup failed';
+    catch (error) {
+        const err = error as FetchErrorLike;
+        let message = err.data?.message || err.data?.statusMessage || err.statusMessage || 'Signup failed';
 
-        if (Array.isArray(error.data?.data)) {
-            message = error.data.data.map((i: any) => i.message).join('\n');
+        if (Array.isArray(err.data?.data)) {
+            message = err.data.data.map(item => item.message).join('\n');
         }
 
         showToast({

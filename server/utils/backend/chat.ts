@@ -1,5 +1,6 @@
 import { NotificationStatus, UserRole } from '@prisma/client';
 
+import { createNotificationsForUsers } from '~~/server/utils/backend/notificationCenter';
 import { prisma } from '~~/server/utils/prisma';
 import type { UserSession } from '~~/types/data';
 import type { ChatMessage } from '~~/types/socket';
@@ -224,24 +225,15 @@ export async function createMessageNotifications(
 
     const uniqueUsersToNotify = Array.from(new Set(usersToNotify));
 
-    const createdNotifications = await Promise.all(uniqueUsersToNotify.map(userId => {
-        return prisma.notification.create({
-            data: {
-                userId,
-                requestId,
-                messageChannelId: channelId,
-                status: NotificationStatus.PENDING,
-                subject: 'Neue Chat Nachricht',
-                body: content,
-            },
-            select: {
-                id: true,
-                userId: true,
-            },
-        });
+    await createNotificationsForUsers(uniqueUsersToNotify.map(userId => ({
+        userId,
+        requestId,
+        messageChannelId: channelId,
+        subject: 'Neue Chat Nachricht',
+        body: content,
+    })));
+
+    return uniqueUsersToNotify.map(userId => ({
+        userId,
     }));
-
-    // TODO: Trigger email notification delivery once mail transport is available.
-
-    return createdNotifications;
 }

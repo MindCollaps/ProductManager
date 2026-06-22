@@ -16,6 +16,9 @@ CREATE TYPE "RepairWorkItemStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'DONE', 'B
 -- CreateEnum
 CREATE TYPE "NotificationStatus" AS ENUM ('PENDING', 'SENT', 'FAILED');
 
+-- CreateEnum
+CREATE TYPE "AuthTokenPurpose" AS ENUM ('EMAIL_VERIFICATION', 'PASSWORD_RESET');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -293,9 +296,23 @@ CREATE TABLE "Notification" (
     "sentAt" TIMESTAMP(3),
     "failedAt" TIMESTAMP(3),
     "errorMessage" TEXT,
+    "emailDigestSentAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AuthToken" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "purpose" "AuthTokenPurpose" NOT NULL,
+    "tokenHash" TEXT NOT NULL,
+    "expiresAt" TIMESTAMP(3) NOT NULL,
+    "consumedAt" TIMESTAMP(3),
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "AuthToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -395,10 +412,22 @@ CREATE INDEX "RepairAttachment_requestId_createdAt_idx" ON "RepairAttachment"("r
 CREATE INDEX "Notification_userId_status_idx" ON "Notification"("userId", "status");
 
 -- CreateIndex
+CREATE INDEX "Notification_userId_emailDigestSentAt_idx" ON "Notification"("userId", "emailDigestSentAt");
+
+-- CreateIndex
 CREATE INDEX "Notification_requestId_createdAt_idx" ON "Notification"("requestId", "createdAt");
 
 -- CreateIndex
 CREATE INDEX "Notification_messageChannelId_createdAt_idx" ON "Notification"("messageChannelId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AuthToken_tokenHash_key" ON "AuthToken"("tokenHash");
+
+-- CreateIndex
+CREATE INDEX "AuthToken_userId_purpose_consumedAt_idx" ON "AuthToken"("userId", "purpose", "consumedAt");
+
+-- CreateIndex
+CREATE INDEX "AuthToken_expiresAt_idx" ON "AuthToken"("expiresAt");
 
 -- AddForeignKey
 ALTER TABLE "Device" ADD CONSTRAINT "Device_deviceBrandId_fkey" FOREIGN KEY ("deviceBrandId") REFERENCES "DeviceBrand"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -498,3 +527,6 @@ ALTER TABLE "Notification" ADD CONSTRAINT "Notification_requestId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "Notification" ADD CONSTRAINT "Notification_messageChannelId_fkey" FOREIGN KEY ("messageChannelId") REFERENCES "MessageChannel"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AuthToken" ADD CONSTRAINT "AuthToken_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

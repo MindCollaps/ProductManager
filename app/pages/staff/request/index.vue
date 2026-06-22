@@ -6,7 +6,10 @@
             </ui-input-text>
 
             <div class="req-filter-select">
-                <label class="req-filter-label" for="request-status-filter">
+                <label
+                    class="req-filter-label"
+                    for="request-status-filter"
+                >
                     Status
                 </label>
                 <select
@@ -138,6 +141,7 @@ function resolveDisplayStatus(request: RepairRequestWithRelationsType) {
 
 .req-filter-label {
     display: block;
+
     margin-bottom: 8px;
 
     font-size: 13px;

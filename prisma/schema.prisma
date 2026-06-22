@@ -56,6 +56,11 @@ enum NotificationStatus {
   FAILED
 }
 
+enum AuthTokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -76,6 +81,7 @@ model User {
   assignedWorkItems         RepairWorkItem[]           @relation("AssignedWorkItems")
   partOrders                PartOrder[]
   notifications             Notification[]
+  authTokens                AuthToken[]
   uploadedFiles             RepairAttachment[]
   statusHistoryCreated      RepairStatusHistory[]
   createdWorkItemTypes      WorkItemType[]
@@ -394,6 +400,7 @@ model Notification {
   sentAt       DateTime?
   failedAt     DateTime?
   errorMessage String?
+  emailDigestSentAt DateTime?
   createdAt    DateTime           @default(now())
 
   user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -401,6 +408,22 @@ model Notification {
   messageChannel MessageChannel? @relation(fields: [messageChannelId], references: [id], onDelete: SetNull)
 
   @@index([userId, status])
+  @@index([userId, emailDigestSentAt])
   @@index([requestId, createdAt])
   @@index([messageChannelId, createdAt])
+}
+
+model AuthToken {
+  id         String           @id @default(cuid())
+  userId     String
+  purpose    AuthTokenPurpose
+  tokenHash  String           @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose, consumedAt])
+  @@index([expiresAt])
 }

@@ -1,5 +1,5 @@
 <template>
-    <common-page :title="`Chat · ${ repairReq.subject }`">
+    <common-page :title="`Chat · ${ repairReq?.subject }`">
         <div class="chat-room">
             <div class="chat-room_messages">
                 <div
@@ -56,6 +56,7 @@
 
 <script setup lang="ts">
 import type { ChatMessage } from '~~/types/socket';
+import type { RepairRequestWithRelationsType } from '~~/types/req';
 import { ToastMode } from '~~/types/toast';
 
 import { useSocketClient } from '~/composables/socketClient';
