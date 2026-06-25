@@ -42,15 +42,22 @@ export const useStore = defineStore('index', {
         setNotificationUnreadCount(count: number) {
             this.notificationUnreadCount = Math.max(0, count);
         },
+        logout() {
+            this.me = undefined;
+            this.notificationUnreadCount = 0;
+            navigateTo('/login');
+        },
         async fetchMe() {
             try {
                 const data = await $fetch<WebUser>('/api/v1/user/me');
                 this.me = data;
-                console.log(this.me);
             }
-            catch {
+            catch (error: any) {
                 this.me = undefined;
                 this.notificationUnreadCount = 0;
+                if (error?.statusCode === 401 || error?.response?.status === 401) {
+                    navigateTo('/login');
+                }
             }
         },
     },

@@ -393,7 +393,7 @@ model PartOrder {
   request     RepairRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
   device      RepairDevice? @relation(fields: [deviceId], references: [id], onDelete: SetNull)
   catalogPart PartCatalog?  @relation(fields: [catalogPartId], references: [id], onDelete: SetNull)
-  workItem    RepairWorkItem? @relation(fields: [workItemId], references: [id], onDelete: SetNull)
+  workItem    RepairWorkItem? @relation(fields: [workItemId], references: [id], onDelete: Cascade)
   createdBy   User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([requestId, status])

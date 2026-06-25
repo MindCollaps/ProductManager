@@ -21,6 +21,7 @@
                     v-if="field.type === 'category'"
                     v-model="field.value as DeviceCategory[]"
                     path="/api/v1/admin/device-category"
+                    :title="field.label"
                 >
                     <template
                         #add="{ item }"

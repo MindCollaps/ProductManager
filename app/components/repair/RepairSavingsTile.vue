@@ -1,29 +1,25 @@
 <template>
     <common-box class="savings-tile">
-        <h3>Ersparnis durch Reparatur</h3>
-        <div class="savings-tile-grid">
-            <div class="savings-tile-item">
-                <span class="savings-tile-label">Neukaufwert</span>
-                <strong>{{ formatCurrency(summary.newPurchaseValue) }}</strong>
+        <h3>Reparaturwert</h3>
+        <div class="savings-tile-hero">
+            <div class="savings-tile-card savings-tile-card--repair">
+                <span class="savings-tile-card-label">Reparaturwert</span>
+                <strong class="savings-tile-card-value">{{ formatCurrency(summary.repairValue) }}</strong>
             </div>
-            <div class="savings-tile-item">
-                <span class="savings-tile-label">Reparaturwert</span>
-                <strong>{{ formatCurrency(summary.repairValue) }}</strong>
-            </div>
-            <div class="savings-tile-item">
-                <span class="savings-tile-label">Arbeitskosten</span>
-                <strong>{{ formatCurrency(summary.laborCost) }}</strong>
-            </div>
-            <div class="savings-tile-item">
-                <span class="savings-tile-label">Teilekosten</span>
-                <strong>{{ formatCurrency(summary.partsCost) }}</strong>
+            <div class="savings-tile-card savings-tile-card--purchase">
+                <span class="savings-tile-card-label">Neukaufwert</span>
+                <strong class="savings-tile-card-value">{{ formatCurrency(summary.newPurchaseValue) }}</strong>
             </div>
         </div>
-        <div
-            class="savings-tile-total"
-            :class="summary.savedValue >= 0 ? 'savings-tile-total--positive' : 'savings-tile-total--negative'"
-        >
-            Ersparnis: {{ formatCurrency(summary.savedValue) }}
+        <div class="savings-tile-breakdown">
+            <div class="savings-tile-breakdown-item">
+                <span>Arbeitskosten</span>
+                <span>{{ formatCurrency(summary.laborCost) }}</span>
+            </div>
+            <div class="savings-tile-breakdown-item">
+                <span>Teilekosten</span>
+                <span>{{ formatCurrency(summary.partsCost) }}</span>
+            </div>
         </div>
     </common-box>
 </template>
@@ -46,46 +42,70 @@ defineProps({
 .savings-tile {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
 
-    &-grid {
+    h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    &-hero {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        grid-template-columns: 1fr 1fr;
         gap: 12px;
     }
 
-    &-item {
+    &-card {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 6px;
 
-        padding: 12px;
-        border: 1px solid $lightgray125;
+        padding: 14px 16px;
         border-radius: 12px;
 
-        background: rgb(255 255 255 / 3%);
+        &-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+        }
+
+        &-value {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        &--repair {
+            color: $success500;
+            background: rgb(102 187 88 / 15%);
+            border: 1px solid rgb(102 187 88 / 30%);
+        }
+
+        &--purchase {
+            color: $warning500;
+            background: rgb(187 157 88 / 15%);
+            border: 1px solid rgb(187 157 88 / 30%);
+        }
     }
 
-    &-label {
+    &-breakdown {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        padding-top: 4px;
+        border-top: 1px solid $lightgray125;
+    }
+
+    &-breakdown-item {
+        display: flex;
+        justify-content: space-between;
+
         font-size: 12px;
         color: $typographyPrimary;
-    }
-
-    &-total {
-        width: fit-content;
-        padding: 8px 10px;
-        border-radius: 10px;
-        font-weight: 700;
-
-        &--positive {
-            color: $success500;
-            background: rgb(53 199 90 / 20%);
-        }
-
-        &--negative {
-            color: $error500;
-            background: rgb(226 70 79 / 20%);
-        }
+        opacity: 0.7;
     }
 }
 </style>

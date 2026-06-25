@@ -154,6 +154,13 @@ watch(() => props.request.partOrders, orders => {
     partOrders.value = [...(orders ?? [])];
 }, { immediate: true });
 
+watch(selectedCatalogPart, parts => {
+    const part = parts[0];
+    if (part?.retailPrice != null) {
+        partEstimatedCost.value = parseFloat(String(part.retailPrice));
+    }
+});
+
 const phases = computed(() => groupRepairWorkItemsByPhase(workItems.value));
 const completedWorkItems = computed(() => workItems.value.filter(workItem => workItem.status === 'DONE').length);
 
@@ -273,6 +280,7 @@ async function deleteWorkItem(item: RepairWorkItemWithRelationsType) {
         method: 'DELETE',
     });
 
+    partOrders.value = partOrders.value.filter(po => po.workItemId !== item.id);
     removeLocalWorkItem(item.id);
 }
 

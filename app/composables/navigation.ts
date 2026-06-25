@@ -24,7 +24,7 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
         },
         {
             text: 'Requests',
-            path: '/request',
+            path: (store.me?.isStaff || store.me?.isAdmin) ? '/staff/request' : '/request',
             icon: 'material-symbols:search',
             hide: !store.me?.loggedIn,
         },
@@ -34,19 +34,9 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
             hide: !(store.me?.isStaff || store.me?.isAdmin),
             children: [
                 {
-                    text: 'Requests',
-                    path: '/staff/request',
-                    icon: 'material-symbols:home-repair-service',
-                },
-                {
                     text: 'History',
                     path: '/staff/history',
                     icon: 'material-symbols:history',
-                },
-                {
-                    text: 'Parts',
-                    path: '/staff/parts',
-                    icon: 'material-symbols:build-circle',
                 },
             ],
         },
@@ -74,6 +64,11 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
                     text: 'Work Item Types',
                     path: '/admin/work-item-type',
                     icon: 'material-symbols:list',
+                },
+                {
+                    text: 'Parts',
+                    path: '/admin/parts',
+                    icon: 'material-symbols:build-circle',
                 },
                 {
                     text: 'Config',

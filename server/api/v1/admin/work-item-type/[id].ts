@@ -1,43 +1,30 @@
 import { crud } from '../../../../utils/backend/crud';
 import { workItemTypeCreateSchema } from '~~/server/utils/backend/validation';
 import { pickDefinedFields } from '~~/server/utils/backend/routeHelpers';
+import type { Prisma } from '@prisma/client';
 
 export default crud(prisma.workItemType, {
     resourceName: 'Work Item Type',
-    get: {
-        run: async ({ record }) => record,
-    },
+    notFoundMessage: 'Work Item Type not found',
     update: {
         schema: workItemTypeCreateSchema.partial(),
-        notFoundMessage: 'Work Item Type not found',
         run: async ({ id, body }) => {
-            const updatedData = pickDefinedFields({
-                name: body.name,
-                slug: body.slug,
-                color: body.color,
-                description: body.description,
-                icon: body.icon,
-                sortOrder: body.sortOrder,
-                laborMinutes: body.laborMinutes,
-                isDefault: body.isDefault,
-            });
-
             const updatedWorkItemType = await prisma.workItemType.update({
                 where: { id },
-                data: updatedData as any,
+                data: pickDefinedFields({
+                    name: body.name,
+                    slug: body.slug,
+                    color: body.color,
+                    description: body.description,
+                    icon: body.icon,
+                    sortOrder: body.sortOrder,
+                    laborMinutes: body.laborMinutes,
+                    isDefault: body.isDefault,
+                }) as Prisma.WorkItemTypeUpdateInput,
             });
 
-            return { message: 'Device updated', data: updatedWorkItemType };
+            return { message: 'Work Item Type updated', data: updatedWorkItemType };
         },
     },
-    delete: {
-        notFoundMessage: 'Work Item Type not found',
-        run: async ({ id }: { id: string }) => {
-            await prisma.workItemType.delete({
-                where: { id },
-            });
-
-            return { message: 'Work Item Type deleted' };
-        },
-    },
+    delete: {},
 });

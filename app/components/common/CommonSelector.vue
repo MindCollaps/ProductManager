@@ -145,7 +145,6 @@ function clearBlurTimeout() {
 
 function openDropdown() {
     clearBlurTimeout();
-    showAll.value = true;
     searchTextRef.value?.focus();
 }
 
@@ -319,7 +318,7 @@ function onBlur(event: FocusEvent) {
         background: none;
 
         &::placeholder {
-            color: $typographySecondary;
+            color: $lightgray400;
         }
 
         &:focus {
@@ -408,7 +407,7 @@ function onBlur(event: FocusEvent) {
         &_empty {
             padding: 16px;
             font-size: 13px;
-            color: $typographySecondary;
+            color: $lightgray400;
             text-align: center;
         }
     }

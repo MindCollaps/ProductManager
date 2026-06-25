@@ -1,56 +1,33 @@
 import { crud } from '../../../../utils/backend/crud';
 import { deviceCreateSchema } from '~~/server/utils/backend/validation';
 import { DeviceWithRelations } from '~~/types/req';
+import type { Prisma } from '@prisma/client';
 
 export default crud(prisma.device, {
     resourceName: 'Device',
+    notFoundMessage: 'Device not found',
     get: {
         include: DeviceWithRelations,
-        run: async ({ record }) => record,
     },
     update: {
         schema: deviceCreateSchema.partial(),
-        notFoundMessage: 'Device not found',
         run: async ({ id, body }) => {
-            const updatedData: Record<string, unknown> = {};
+            const data: Prisma.DeviceUpdateInput = {};
 
-            if (body.name) {
-                updatedData.name = body.name;
-            }
-
-            if (body.description) {
-                updatedData.description = body.description;
-            }
-
+            if (body.name) data.name = body.name;
+            if (body.description) data.description = body.description;
             if (body.categories) {
-                updatedData.deviceCategories = {
-                    deleteMany: {
-                        deviceId: id,
-                    },
+                data.deviceCategories = {
+                    deleteMany: { deviceId: id },
                     create: body.categories.map((categoryId: string) => ({
-                        category: {
-                            connect: { id: categoryId },
-                        },
+                        category: { connect: { id: categoryId } },
                     })),
                 };
             }
 
-            const updatedDevice = await prisma.device.update({
-                where: { id },
-                data: updatedData as any,
-            });
-
+            const updatedDevice = await prisma.device.update({ where: { id }, data });
             return { message: 'Device updated', data: updatedDevice };
         },
     },
-    delete: {
-        notFoundMessage: 'Device not found',
-        run: async ({ id }: { id: string }) => {
-            await prisma.device.delete({
-                where: { id },
-            });
-
-            return { message: 'Device deleted' };
-        },
-    },
+    delete: {},
 });

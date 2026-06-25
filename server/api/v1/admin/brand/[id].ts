@@ -1,31 +1,20 @@
 import { crud } from '../../../../utils/backend/crud';
 import { deviceBrandCreateSchema } from '~~/server/utils/backend/validation';
+import type { Prisma } from '@prisma/client';
 
 export default crud(prisma.deviceBrand, {
     resourceName: 'Brand',
-    get: {
-        run: async ({ record }) => record,
-    },
+    notFoundMessage: 'Brand not found',
     update: {
         schema: deviceBrandCreateSchema.partial(),
-        notFoundMessage: 'Brand not found',
         run: async ({ id, body }) => {
             const updatedBrand = await prisma.deviceBrand.update({
                 where: { id },
-                data: body.name ? { name: body.name } : {},
+                data: body.name ? { name: body.name } : {} as Prisma.DeviceBrandUpdateInput,
             });
 
             return { message: 'Brand updated', data: updatedBrand };
         },
     },
-    delete: {
-        notFoundMessage: 'Brand not found',
-        run: async ({ id }: { id: string }) => {
-            await prisma.deviceBrand.delete({
-                where: { id },
-            });
-
-            return { message: 'Brand deleted' };
-        },
-    },
+    delete: {},
 });

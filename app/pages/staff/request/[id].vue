@@ -9,6 +9,21 @@
                 <h2>Customer details</h2>
                 {{ repairReq?.customer.displayName }} ({{ repairReq?.customer.username }}) /
                 {{ repairReq?.customer.email }}
+                <div class="request-assign">
+                    <h3>Assigned Staff</h3>
+                    <common-selector
+                        v-model="selectedAssignedStaff"
+                        one
+                        path="/api/v1/staff/user"
+                    >
+                        <template #add="{ item }">
+                            {{ item.name }}
+                        </template>
+                        <template #remove="{ item }">
+                            {{ item.name }}
+                        </template>
+                    </common-selector>
+                </div>
                 <ui-button @click="openChat()">{{ chatButtonText }}</ui-button>
                 <div
                     v-if="allWorkItemsDone"
@@ -119,6 +134,9 @@
                     @update="onRepairStepGraphUpdate"
                 />
             </div>
+            <div class="request-savings">
+                <repair-savings-tile :summary="savingsSummary"/>
+            </div>
         </div>
     </common-page>
 </template>
@@ -128,6 +146,9 @@ import { RepairRequestStatus, RepairStatus } from '@prisma/client';
 
 import type { Device } from '@prisma/client';
 import LabeledText from '~/components/ui/LabeledText.vue';
+import RepairSavingsTile from '~/components/repair/RepairSavingsTile.vue';
+import { calculateRepairSavings } from '~~/app/utils/repairSavings';
+import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
 
 const route = useRoute();
@@ -140,9 +161,40 @@ const notes = ref('');
 const selectedDevice: Ref<Device | null> = ref(null);
 const repairDevice = ref<RepairDeviceWithRelationsType | null>(null);
 
+type StaffUser = { id: string; name: string };
+const selectedAssignedStaff = ref<StaffUser[]>([]);
+const assignInitializing = ref(true);
+
 const { data: repairReq, refresh: refreshRepairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/staff/request/${ id }`);
 const { data: devices } = useFetch<Device[]>('/api/v1/staff/device');
+const { data: config } = useFetch<AppConfigResponse>('/api/v1/user/config');
 const repairStatusOverride = ref<RepairStatus | null>(null);
+
+const hourlyRate = computed(() => Number(config.value?.hourlyRate ?? 0));
+const savingsSummary = computed(() => {
+    if (!repairReq.value) {
+        return { laborCost: 0, newPurchaseValue: 0, partsCost: 0, repairValue: 0, savedValue: 0 };
+    }
+    return calculateRepairSavings(repairReq.value, hourlyRate.value);
+});
+
+watch(() => repairReq.value?.assignedStaff, staff => {
+    assignInitializing.value = true;
+    const u = staff;
+    selectedAssignedStaff.value = u
+        ? [{ id: u.id, name: u.displayName ?? u.username ?? u.email }]
+        : [];
+    nextTick(() => { assignInitializing.value = false; });
+}, { immediate: true });
+
+watch(selectedAssignedStaff, async staff => {
+    if (assignInitializing.value) return;
+    await $fetch(`/api/v1/staff/request/${ id }`, {
+        method: 'PUT',
+        body: { assignedStaffId: staff[0]?.id ?? null },
+    });
+    await refreshRepairReq();
+});
 
 const latestRepairStatus = computed(() => repairReq.value?.statusHistory?.[0]?.status ?? null);
 const effectiveRepairStatus = computed(() => repairStatusOverride.value ?? latestRepairStatus.value);
@@ -391,6 +443,10 @@ async function archiveRequest() {
         background: $darkgray800;
     }
 
+    &-savings {
+        grid-column: 1 / -1;
+    }
+
     &-customer {
         display: flex;
         flex-direction: column;
@@ -400,6 +456,18 @@ async function archiveRequest() {
         border-radius: 8px;
 
         background: $darkgray800;
+    }
+
+    &-assign {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        h3 {
+            margin: 0;
+            font-size: 13px;
+            font-weight: 600;
+        }
     }
 
     &-state-actions {

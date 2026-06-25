@@ -17,6 +17,7 @@
             <h2>Bisher keine Anfragen erstellt</h2>
             <ui-button @click="router.push('/request/new')">Anfrage Erstellen</ui-button>
         </common-box>
+        <ui-button v-else @click="router.push('/request/new')">Neue Anfrage Erstellen</ui-button>
     </div>
 </template>
 

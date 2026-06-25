@@ -3,34 +3,25 @@
 </template>
 
 <script setup lang="ts">
-import type { ParametersPage } from '~~/types/components';
 import type { PartCatalogEntry } from '~~/types/parts';
+import type { ParametersPage } from '~~/types/components';
 
 const router = useRouter();
-const { data: parts, refresh } = useFetch<PartCatalogEntry[]>('/api/v1/staff/part-catalog');
+const { data: parts, refresh } = useFetch<PartCatalogEntry[]>('/api/v1/admin/part-catalog');
 
 const params = computed<ParametersPage>(() => {
     return {
         editable: true,
         removeable: true,
         title: 'Parts Catalog',
-        onCreate: '/staff/parts/new',
+        onCreate: '/admin/parts/new',
         entries: (parts.value ?? []).map(part => ({
             onDelete: async () => {
-                const confirmed = confirm(`Delete ${ part.name }?`);
-                if (!confirmed) {
-                    return;
-                }
-
-                await $fetch(`/api/v1/staff/part-catalog/${ part.id }`, {
-                    method: 'DELETE',
-                });
-
+                if (!confirm(`Delete ${ part.name }?`)) return;
+                await $fetch(`/api/v1/admin/part-catalog/${ part.id }`, { method: 'DELETE' });
                 await refresh();
             },
-            onEdit: () => {
-                router.push(`/staff/parts/${ part.id }`);
-            },
+            onEdit: () => router.push(`/admin/parts/${ part.id }`),
             fields: [
                 { label: 'Name', type: 'text', value: part.name },
                 { label: 'Manufacturer', type: 'text', value: part.manufacturer ?? '' },
