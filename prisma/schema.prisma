@@ -348,7 +348,7 @@ model RepairWorkItem {
 model AppConfig {
   id                     String   @id @default("default")
   hourlyRate             Decimal  @db.Decimal(12, 2) @default(0)
-  showTimelineToCustomer Boolean  @default(false)
+  showTimelineToCustomer Boolean  @default(true)
   demoMode               Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
