@@ -2,6 +2,8 @@ import { buildAccountVerificationEmail } from './templates/accountVerificationEm
 import { buildPasswordResetEmail } from './templates/passwordResetEmail';
 import { buildNewRequestAlertEmail } from './templates/newRequestAlertEmail';
 import { buildRequestAcceptedEmail } from './templates/requestAcceptedEmail';
+import { buildRepairReceivedEmail } from './templates/repairReceivedEmail';
+import { buildPackageShippedEmail } from './templates/packageShippedEmail';
 import { buildNotificationDigestEmail } from './templates/notificationDigestEmail';
 import { sendEmail } from './client';
 import { getMailConfig } from './config';
@@ -85,6 +87,38 @@ export async function sendRequestAcceptedEmail(
         subject,
         requestUrl,
     });
+
+    await sendEmail({
+        to: email,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+    });
+}
+
+export async function sendRepairReceivedEmail(
+    email: string,
+    customerName: string,
+    requestSubject: string,
+    requestUrl: string,
+): Promise<void> {
+    const template = buildRepairReceivedEmail({ customerName, requestSubject, requestUrl });
+
+    await sendEmail({
+        to: email,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+    });
+}
+
+export async function sendPackageShippedEmail(
+    email: string,
+    customerName: string,
+    requestSubject: string,
+    requestUrl: string,
+): Promise<void> {
+    const template = buildPackageShippedEmail({ customerName, requestSubject, requestUrl });
 
     await sendEmail({
         to: email,

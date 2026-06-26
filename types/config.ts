@@ -1,5 +1,7 @@
 export interface AppConfigResponse {
     hourlyRate: number | string;
+    showTimelineToCustomer: boolean;
+    demoMode: boolean;
 }
 
 export interface RepairSavingsSummary {

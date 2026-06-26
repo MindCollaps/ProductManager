@@ -4,6 +4,15 @@
         :title="`Reperaturauftrag von ${ repairReq?.customer.displayName }`"
     >
         <ui-status :status="displayStatus"/>
+        <div class="request-savings">
+            <repair-savings-tile :summary="savingsSummary"/>
+        </div>
+        <div
+            v-if="repairReq.statusHistory.length > 0"
+            class="request-timeline"
+        >
+            <repair-timeline :history="repairReq.statusHistory"/>
+        </div>
         <div class="request-container">
             <div class="request-customer">
                 <h2>Customer details</h2>
@@ -29,14 +38,19 @@
                     v-if="allWorkItemsDone"
                     class="request-state-actions"
                 >
-                    <ui-button @click="setRequestState('COMPLETED')">Mark Complete</ui-button>
                     <ui-button
+                        v-if="repairReq.status !== RepairRequestStatus.COMPLETED"
+                        @click="setRequestState('COMPLETED')"
+                    >Mark Complete</ui-button>
+                    <ui-button
+                        v-if="repairReq.status !== RepairRequestStatus.COMPLETED"
                         primary-color="error600"
                         @click="setRequestState('REJECTED')"
                     >
                         Reject
                     </ui-button>
                     <ui-button
+                        v-if="repairReq.status !== RepairRequestStatus.COMPLETED"
                         primary-color="error600"
                         @click="setRequestState('CANCELLED')"
                     >
@@ -134,9 +148,6 @@
                     @update="onRepairStepGraphUpdate"
                 />
             </div>
-            <div class="request-savings">
-                <repair-savings-tile :summary="savingsSummary"/>
-            </div>
         </div>
     </common-page>
 </template>
@@ -147,6 +158,7 @@ import { RepairRequestStatus, RepairStatus } from '@prisma/client';
 import type { Device } from '@prisma/client';
 import LabeledText from '~/components/ui/LabeledText.vue';
 import RepairSavingsTile from '~/components/repair/RepairSavingsTile.vue';
+import RepairTimeline from '~/components/repair/RepairTimeline.vue';
 import { calculateRepairSavings } from '~~/app/utils/repairSavings';
 import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
@@ -447,6 +459,17 @@ async function archiveRequest() {
 
     &-savings {
         grid-column: 1 / -1;
+        width: 100%;
+    }
+
+    &-timeline {
+        grid-column: 1 / -1;
+
+        width: 100%;
+        padding: 16px;
+        border-radius: 8px;
+
+        background: $darkgray800;
     }
 
     &-customer {

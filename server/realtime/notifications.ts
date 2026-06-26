@@ -11,6 +11,7 @@ export interface NotificationCreateInput {
     messageChannelId?: string | null;
     subject: string;
     body: string;
+    skipDigest?: boolean;
 }
 
 interface NotificationDigestRow {
@@ -34,6 +35,7 @@ export async function createNotification(input: NotificationCreateInput) {
             status: NotificationStatus.PENDING,
             subject: input.subject,
             body: input.body,
+            emailDigestSentAt: input.skipDigest ? new Date() : null,
         },
     });
 

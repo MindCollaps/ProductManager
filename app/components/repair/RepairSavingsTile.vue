@@ -43,6 +43,7 @@ defineProps({
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: 100%;
 
     h3 {
         margin: 0;

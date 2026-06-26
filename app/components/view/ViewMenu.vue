@@ -120,7 +120,7 @@ const headerMenu = computed(() => {
 
             &_menu {
                 position: absolute;
-                z-index: 10;
+                z-index: 1000;
                 top: calc(100% - 1px);
                 left: 0;
 

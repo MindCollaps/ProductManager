@@ -4,36 +4,63 @@ Modernes Reparatur- und Auftragsmanagement für Werkstätten, Service-Teams und 
 
 ## Überblick
 
-ProductManager soll den kompletten Weg einer Reparaturanfrage abbilden: vom ersten Kunden-Login über die Anfrage, die interne Sichtung und die Kommunikation bis hin zur Statusverfolgung, Ersatzteilverwaltung und Auswertung von Statistiken. Der Fokus liegt auf einem klaren Ablauf, nachvollziehbaren Statuswechseln und einer sauberen Historie pro Gerät.
+ProductManager bildet den kompletten Weg einer Reparaturanfrage ab: vom ersten Kunden-Login über die Anfrage, die interne Bearbeitung und Kommunikation bis hin zur Ersatzteilverwaltung, Statusverfolgung und Reparaturwert-Auswertung.
 
-## Aktueller Funktionsstand
+## Implementierte Funktionen
 
-- Reparaturanfragen mit Kunden- und Staff-Sichten
-- Arbeitsschritte (inklusive Statuswechseln wie PENDING, IN_PROGRESS, DONE)
-- Chat pro Anfrage via Socket.IO
-- Benachrichtigungen mit Badge, Mark-All-Read und Delete-Read
-- Statushistorie für Reparaturphasen
-- Archiv- und Verlaufssichten für abgeschlossene Aufträge
+### Kundenbereich
+- Registrierung und Login mit E-Mail-Verifizierung
+- Neue Reparaturanfragen erstellen (Gerät, Problembeschreibung, Verdacht)
+- Eigene Anfragen und deren Status einsehen
+- Echtzeit-Chat pro Anfrage
+- In-App-Benachrichtigungen mit Badge-Zähler (als gelesen markieren, löschen)
+- Reparaturwert-Tile: Gegenüberstellung Reparaturkosten (grün) vs. Neukaufwert (gelb)
+- Reparatur-Graph der Arbeitsschritte in Lesansicht
 
-## Was das System später zusätzlich können soll
+### Staff-Bereich
+- Übersicht und Detailansicht aller Reparaturanfragen
+- Anfragen annehmen, ablehnen, abschließen, stornieren, archivieren
+- Mitarbeiter einer Anfrage zuweisen
+- Arbeitsschritte (Work Items) anlegen, bearbeiten, löschen
+  - Status: PENDING, IN_PROGRESS, DONE
+  - Mitarbeiter-Zuweisung pro Schritt
+  - Standardschritte zurücksetzen
+- Ersatzteil-Bestellungen pro Arbeitsschritt
+  - Teile aus dem Katalog hinzufügen (Menge, Lieferant, Kostenschätzung)
+  - Statusverlauf: DRAFT → ORDERED → SHIPPED → RECEIVED → INSTALLED
+- Reparaturgerät anlegen und bearbeiten (Seriennummer, Anzeigename, Notizen)
+- Reparaturstatus-Phasen setzen (RECEIVED → IN_DIAGNOSIS → WAITING_FOR_PARTS → IN_REPAIR → IN_QA → IN_OUTGOING → ...)
+- Chat mit Kunden
+- Verlauf / Archiv abgeschlossener Aufträge
+- Reparaturwert-Tile
 
-- 📬 E-Mail-Updates zu jedem wichtigen Statuswechsel des Pakets und der Reparatur
-- 💸 Anzeige von gespartem Wert im Vergleich zum Neukauf
+### Admin-Bereich (Obermenge von Staff)
+- Gerätekatalog verwalten (Geräte, Marken, Kategorien)
+- Arbeitsschritttypen verwalten
+- Ersatzteilkatalog verwalten (Name, Hersteller, SKU, Einkaufs- und Verkaufspreis)
+- Systemkonfiguration (Stundensatz für Arbeitskostenberechnung)
+
+### Echtzeit & Hintergrund
+- Socket.IO für Chat-Nachrichten und Benachrichtigungs-Badges
+- Automatische Zustandssynchronisation (Anfragestatus aus Arbeitsschritt-Completion)
+- Benachrichtigungs-Digest per E-Mail (konfigurierbar)
+- E-Mails: Kontobestätigung, Passwort-Reset, Anfrage-Annahme
+
+### Sicherheit & Infrastruktur
+- JWT-Sessions in Redis (kein DB-Session-Store)
+- Rollenbasierte Zugriffskontrolle: CUSTOMER / STAFF / ADMIN
+- Rate-Limiting für Auth-Endpunkte
+- Auto-Logout bei abgelaufenem Token (401-Interceptor)
+
+## Geplante Erweiterungen
+
 - 🕒 Timeline mit der Zeit, die ein Auftrag in jedem Status verbracht hat
 - 📦 Warteschlange mit geschätzter Restzeit auf Basis der aktuellen Auslastung
-- 💬 Rückfragen per E-Mail, wenn Informationen fehlen oder unklar sind
 - 📊 Statistik- und Graph-Ansichten für Gerätetypen, Reparaturarten und Team-Auswertung
 
-## Beispielablauf
+## Ablauf einer Reparaturanfrage
 
-Ein Kunde legt ein Konto an, sendet eine Reparaturanfrage und beschreibt Gerät, Vermutung und bereits getestete Schritte. Das Team prüft die Anfrage, stellt Rückfragen und setzt den Status auf „warte auf Antwort“. Sobald die nötigen Informationen da sind, wird die Anfrage angenommen.
-
-Danach folgen Versand, Wareneingang, interne Sichtung, Ersatzteilbestellung, Reparatur, Test und Warenausgang. Jede Phase soll später zeitlich erfasst werden, damit Kundinnen und Kunden sowie das Team jederzeit sehen können, wo sich der Auftrag befindet und wie lange der nächste Schritt ungefähr noch dauert.
-
-## Dokumentation
-
-- [Detaillierter Ablauf einer Reparaturanfrage](docs/repair-flow.md)
-- [Funktionsübersicht und geplante Module](docs/features.md)
+Siehe [Detaillierter Ablauf](docs/repair-flow.md) für den vollständigen End-to-End-Prozess.
 
 ## Screenshots
 
@@ -53,43 +80,44 @@ Danach folgen Versand, Wareneingang, interne Sichtung, Ersatzteilbestellung, Rep
 
 ### Voraussetzungen
 
-- Node.js oder Bun
-- Docker und Docker Compose für den bevorzugten lokalen Workflow
-- Eine konfigurierte PostgreSQL-Datenbank für Prisma
+- Bun
+- Docker und Docker Compose (bevorzugter lokaler Workflow)
 
-### Lokaler Start
+### Start mit Docker (empfohlen)
+
+```bash
+bun dev
+```
+
+### Lokaler Start (ohne Docker, eigene Postgres/Redis nötig)
 
 ```bash
 bun install
-bun run dev:local
-```
-
-### Start mit Docker
-
-```bash
-bun run dev
+bun dev:local
 ```
 
 ### Nützliche Befehle
 
-- `bun run build` - Production-Build
-- `bun run lint` - Automatische Korrekturen
-- `bun run lint:fix` - Automatische Korrekturen
-- `bun run lint:check` - TypeScript- und Style-Linting
-- `bun run db-push` - Prisma Schema in die Datenbank schreiben
-- `bun run db-deploy` - Prisma Migrationen anwenden
+```bash
+bun build          # Production-Build
+bun lint           # Style- und ESLint-Prüfung
+bun lint:fix       # Automatische Korrekturen
+bun db-push        # Prisma-Schema ohne Migration anwenden (dev)
+bun db-deploy      # Ausstehende Migrationen anwenden (prod-sicher)
+bun db-seed        # Seed-Daten einspielen
+bun db-reset       # Datenbank komplett zurücksetzen (destruktiv)
+npx tsc --noEmit   # TypeScript-Prüfung ohne Build
+```
 
 ## Tech-Stack
 
-- Nuxt 4
-- Vue 3
-- Pinia
-- Prisma
-- PostgreSQL
-- Sass / SCSS
-- Redis
-- Socket.io
-
-## Status
-
-Dieses Repository ist ein frühes Fundament für das spätere Produkt. Inhalte, UI und Datenmodell werden schrittweise ausgebaut.
+| Schicht | Technologie |
+|---|---|
+| Framework | Nuxt 4 (Full-Stack) |
+| Frontend | Vue 3, Pinia, SCSS |
+| ORM | Prisma 7, PostgreSQL |
+| Auth | JWT + Redis |
+| Echtzeit | Socket.IO |
+| Mail | Nodemailer |
+| Runtime | Bun / Node.js |
+| Container | Docker Compose |

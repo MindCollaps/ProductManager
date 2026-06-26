@@ -346,8 +346,19 @@ model RepairWorkItem {
 }
 
 model AppConfig {
-  id         String   @id @default("default")
-  hourlyRate Decimal  @db.Decimal(12, 2) @default(0)
+  id                     String   @id @default("default")
+  hourlyRate             Decimal  @db.Decimal(12, 2) @default(0)
+  showTimelineToCustomer Boolean  @default(false)
+  demoMode               Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model DemoData {
+  id         String   @id @default("singleton")
+  userId     String?
+  requestIds String[]
+  partIds    String[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }

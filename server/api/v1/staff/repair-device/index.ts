@@ -100,6 +100,7 @@ export default crud(prisma.repairDevice, {
                 requestId: body.requestId,
                 subject: 'Your repair request has been accepted',
                 body: 'Your request is now in our processing queue.',
+                skipDigest: true,
             });
 
             const customerName = requestWithCustomer.customer.username ?? requestWithCustomer.customer.email;

@@ -3,6 +3,7 @@ import { RepairRequestStatus, RepairStatus, RepairWorkItemStatus } from '@prisma
 import { createApiError } from '~~/server/utils/apiResponses';
 import { createNotification } from '~~/server/realtime/notifications';
 import { prisma } from '~~/server/utils/prisma';
+import { getMailConfig, sendRepairReceivedEmail, sendPackageShippedEmail } from '~~/server/utils/mail';
 
 const REPAIR_STATUS_PROGRESS_ORDER: Partial<Record<RepairStatus, number>> = {
     [RepairStatus.RECEIVED]: 10,
@@ -87,6 +88,62 @@ export async function getLatestRepairStatus(requestId: string) {
     });
 }
 
+const STATUS_EMAIL_SUBJECTS: Partial<Record<RepairStatus, string>> = {
+    [RepairStatus.RECEIVED]: 'We have received your device',
+    [RepairStatus.ON_THE_WAY_TO_CUSTOMER]: 'Your device is on its way',
+};
+
+async function sendStatusEmailIfNeeded(status: RepairStatus, requestId: string): Promise<boolean> {
+    if (!(status in STATUS_EMAIL_SUBJECTS)) {
+        return false;
+    }
+
+    const data = await prisma.repairRequest.findUnique({
+        where: { id: requestId },
+        select: {
+            subject: true,
+            customer: {
+                select: { email: true, username: true },
+            },
+        },
+    });
+
+    if (!data) {
+        return false;
+    }
+
+    const config = getMailConfig();
+    const requestUrl = `${ config.appBaseUrl }/request/${ requestId }`;
+    const customerName = data.customer.username ?? data.customer.email;
+
+    try {
+        if (status === RepairStatus.RECEIVED) {
+            await sendRepairReceivedEmail(data.customer.email, customerName, data.subject, requestUrl);
+        }
+        else {
+            await sendPackageShippedEmail(data.customer.email, customerName, data.subject, requestUrl);
+        }
+
+        return true;
+    }
+    catch (error) {
+        console.error(`[Mail] Failed to send status email for ${ status } on request ${ requestId }`, error);
+        return false;
+    }
+}
+
+async function notifyCustomerOfStatus(requestId: string, status: RepairStatus, customerId: string) {
+    const emailSent = await sendStatusEmailIfNeeded(status, requestId);
+
+    await createNotification({
+        userId: customerId,
+        requestId,
+        subject: STATUS_EMAIL_SUBJECTS[status] ?? 'Repair status changed',
+        body: `Repair status is now ${ status }`,
+        skipDigest: emailSent,
+    });
+}
+
 async function setRepairStatusAndNotifyCustomer(
     requestId: string,
     status: RepairStatus,
@@ -104,13 +161,20 @@ async function setRepairStatusAndNotifyCustomer(
     }
 
     const statusHistory = await setRepairStatus(requestId, status, createdById ?? null);
+    await notifyCustomerOfStatus(requestId, status, customerId);
 
-    await createNotification({
-        userId: customerId,
-        requestId,
-        subject: 'Repair status changed',
-        body: `Repair status is now ${ status }`,
-    });
+    return statusHistory;
+}
+
+export async function applyRepairStatusAndNotify(
+    requestId: string,
+    status: RepairStatus,
+    customerId: string,
+    createdById?: string | null,
+    note?: string,
+) {
+    const statusHistory = await setRepairStatus(requestId, status, createdById ?? null, note);
+    await notifyCustomerOfStatus(requestId, status, customerId);
 
     return statusHistory;
 }

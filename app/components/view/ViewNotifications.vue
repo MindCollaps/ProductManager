@@ -44,35 +44,40 @@
             >
                 Keine Notifications
             </div>
-            <ui-button
-                v-for="notification in notifications"
-                :key="notification.id"
-                text-align="left"
-                type="secondary"
-                width="100%"
-                @click="openNotification(notification)"
+            <div
+                v-else
+                class="notification-panel_list"
             >
-                <div class="notification-item">
-                    <div class="notification-item_top">
-                        <div class="notification-item_subject">{{ notification.subject }}</div>
-                        <button
-                            class="notification-item_delete"
-                            type="button"
-                            @click.stop="deleteNotification(notification.id)"
-                        >
-                            <Icon name="material-symbols:delete-outline"/>
-                        </button>
+                <ui-button
+                    v-for="notification in notifications"
+                    :key="notification.id"
+                    text-align="left"
+                    type="secondary"
+                    width="100%"
+                    @click="openNotification(notification)"
+                >
+                    <div class="notification-item">
+                        <div class="notification-item_top">
+                            <div class="notification-item_subject">{{ notification.subject }}</div>
+                            <button
+                                class="notification-item_delete"
+                                type="button"
+                                @click.stop="deleteNotification(notification.id)"
+                            >
+                                <Icon name="material-symbols:delete-outline"/>
+                            </button>
+                        </div>
+                        <div class="notification-item_body">{{ notification.body }}</div>
+                        <div class="notification-item_meta">
+                            <span
+                                v-if="notification.status === 'PENDING'"
+                                class="notification-item_new"
+                            >NEW</span>
+                            {{ formatTime(notification.createdAt) }}
+                        </div>
                     </div>
-                    <div class="notification-item_body">{{ notification.body }}</div>
-                    <div class="notification-item_meta">
-                        <span
-                            v-if="notification.status === 'PENDING'"
-                            class="notification-item_new"
-                        >NEW</span>
-                        {{ formatTime(notification.createdAt) }}
-                    </div>
-                </div>
-            </ui-button>
+                </ui-button>
+            </div>
         </div>
     </div>
 </template>
@@ -211,14 +216,12 @@ function formatTime(value: string) {
     top: calc(100% + 8px);
     right: 0;
 
-    overflow: auto;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    gap: 8px;
 
     width: 320px;
-    max-height: 360px;
-    padding: 12px;
+    max-height: 420px;
     border: 1px solid $lightgray125;
     border-radius: 8px;
 
@@ -232,9 +235,12 @@ function formatTime(value: string) {
 
     &_header {
         display: flex;
+        flex-shrink: 0;
         gap: 8px;
         align-items: center;
         justify-content: space-between;
+        padding: 12px 12px 10px;
+        border-bottom: 1px solid $darkgray700;
     }
 
     &_actions {
@@ -243,7 +249,16 @@ function formatTime(value: string) {
         align-items: center;
     }
 
+    &_list {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 10px 12px 12px;
+    }
+
     &_empty {
+        padding: 12px;
         font-size: 12px;
         color: $typographyPrimary;
     }

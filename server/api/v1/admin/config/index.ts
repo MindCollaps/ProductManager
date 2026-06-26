@@ -1,5 +1,6 @@
 import { appConfigUpdateSchema } from '~~/server/utils/backend/validation';
 import { getOrCreateAppConfig } from '~~/server/utils/backend/config';
+import { applyDemoSeed, clearDemoSeed } from '~~/server/utils/backend/demoSeed';
 import { createApiError } from '~~/server/utils/apiResponses';
 
 export default defineEventHandler(async event => {
@@ -12,12 +13,31 @@ export default defineEventHandler(async event => {
 
         const existing = await getOrCreateAppConfig();
 
-        return prisma.appConfig.update({
+        const data: Parameters<typeof prisma.appConfig.update>[0]['data'] = {
+            hourlyRate: body.hourlyRate,
+        };
+
+        if (body.showTimelineToCustomer !== undefined) {
+            data.showTimelineToCustomer = body.showTimelineToCustomer;
+        }
+
+        if (body.demoMode !== undefined) {
+            data.demoMode = body.demoMode;
+        }
+
+        const updated = await prisma.appConfig.update({
             where: { id: existing.id },
-            data: {
-                hourlyRate: body.hourlyRate,
-            },
+            data,
         });
+
+        if (body.demoMode === true && !existing.demoMode) {
+            await applyDemoSeed();
+        }
+        else if (body.demoMode === false && existing.demoMode) {
+            await clearDemoSeed();
+        }
+
+        return updated;
     }
 
     throw createApiError('Method not allowed', 405);

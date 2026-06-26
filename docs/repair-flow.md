@@ -1,55 +1,84 @@
-# Detaillierter Ablauf einer Reparaturanfrage
+# Ablauf einer Reparaturanfrage
 
-Diese Seite beschreibt den geplanten End-to-End-Prozess in mehr Detail als die Haupt-README.
+Dieser Artikel beschreibt den aktuell implementierten End-to-End-Prozess.
 
-## 1. Kundenkonto
+---
 
-Der Kunde legt ein einfaches Konto mit E-Mail und Passwort an. Danach kann er seine Reparaturanfragen, Statusmeldungen und frühere Aufträge später wieder einsehen.
+## 1. Kundenkonto anlegen
 
-## 2. Reparaturanfrage anlegen
+Der Kunde registriert sich mit E-Mail und Passwort. Nach der Registrierung wird eine Bestätigungs-E-Mail verschickt. Erst nach der Verifizierung ist das Konto vollständig aktiv.
 
-Beim Erstellen einer Anfrage werden möglichst viele Basisdaten erfasst:
+## 2. Reparaturanfrage erstellen
 
-- Gerätetyp und Modell
-- Was vermutet der Kunde als Fehler
-- Was wurde bereits getestet
-- Trackingnummer oder Versandhinweise
-- Zusätzliche Bemerkungen oder Fotos
+Über `/request/new` erfasst der Kunde:
 
-## 3. Interne Sichtung
+- Betreff
+- Gerätename, Marke, Modell
+- Problembeschreibung
+- Was bereits versucht wurde
+- Vermutete Ursache
+- Sonstige Hinweise
 
-Das Team sieht neue Anfragen in einer Übersicht und entscheidet, ob noch Rückfragen nötig sind. Falls Informationen fehlen, wird der Status auf „warte auf Antwort“ gesetzt und der Kunde bekommt eine Nachricht.
+Die Anfrage landet im Status **WAITING_FOR_REVIEW**.
 
-## 4. Annahme und Versand
+## 3. Interne Sichtung (Staff)
 
-Sobald alle nötigen Informationen vorliegen, wird die Anfrage angenommen. Der Kunde erhält die Versand- oder Abgabeinformationen, damit das Gerät zum Shop gelangen kann.
+Das Staff-Team sieht alle offenen Anfragen unter `/staff/request`. Über den Anfrage-Chat können Rückfragen gestellt werden. Sobald alle nötigen Infos vorliegen, wird die Anfrage angenommen (**ACCEPTED**).
 
-## 5. Wareneingang und Queue
+Der Kunde erhält eine Benachrichtigung und eine E-Mail mit den Versand- bzw. Abgabeinformationen.
 
-Nach dem Eingang im Shop wird der Auftrag in die interne Warteschlange einsortiert. Dort soll später sichtbar sein:
+## 4. Mitarbeiter-Zuweisung
 
-- Wie viele Aufträge vor diesem Gerät liegen
-- Welche Arbeitsschritte gerade blockieren
-- Wie lange die aktuelle Phase voraussichtlich noch dauert
+Ein Mitarbeiter wird der Anfrage zugewiesen. Die Zuweisung ist jederzeit änderbar und dient der internen Nachvollziehbarkeit.
 
-## 6. Sichtung und Diagnose
+## 5. Reparaturgerät anlegen
 
-Ein Mitarbeiter prüft das Gerät, ordnet Kategorien zu und dokumentiert den vermuteten Defekt. Diese Daten fließen später in Statistiken ein, damit man Trends wie häufige Gerätemodelle oder typische Defekte erkennen kann.
+Nachdem das Gerät eingegangen ist, legt das Staff-Team ein Reparaturgerät an (Gerät aus Katalog auswählen, Seriennummer und Anzeigename vergeben). Ab diesem Punkt sind die Reparaturstatus-Phasen verfügbar.
 
-## 7. Ersatzteile und Reparatur
+## 6. Reparaturstatus-Phasen
 
-Falls Ersatzteile benötigt werden, wechselt der Auftrag in einen passenden Status wie „wartet auf Ersatzteile“. Nach der Lieferung folgen die eigentliche Reparatur, Lötarbeiten, Batteriewechsel oder andere Teilschritte.
+Das Team setzt den physischen Gerätestatus manuell:
 
-## 8. Tests und Warenausgang
+| Phase | Bedeutung |
+|---|---|
+| RECEIVED | Gerät ist eingegangen |
+| IN_DIAGNOSIS | Sichtung und Fehlerdiagnose |
+| WAITING_FOR_PARTS | Warte auf Ersatzteile |
+| IN_REPAIR | Aktive Reparatur |
+| IN_QA | Qualitätsprüfung |
+| IN_OUTGOING | Im Warenausgang |
+| ON_THE_WAY_TO_CUSTOMER | Unterwegs zum Kunden |
+| DELIVERED | Zugestellt |
+| ARCHIVED | Archiviert |
 
-Zum Schluss werden Funktionstest und Endkontrolle dokumentiert. Wenn alles passt, geht das Gerät in den Warenausgang und der Kunde erhält die Abschlussmeldung.
+## 7. Arbeitsschritte (Work Items)
 
-## 9. Historie und Auswertung
+Pro Anfrage werden Arbeitsschritte im Reparatur-Graph dokumentiert:
 
-Der komplette Verlauf bleibt erhalten:
+- Jeder Schritt hat einen Typ (z. B. Diagnose, Löten, Test), einen Status und optional einen zugewiesenen Mitarbeiter.
+- Status: **PENDING → IN_PROGRESS → DONE**
+- Sobald alle Schritte auf DONE stehen, kann die Anfrage als abgeschlossen markiert werden.
+- Der Anfragestatus synchronisiert sich automatisch mit dem Fortschritt der Schritte.
 
-- Statuswechsel mit Zeitdauer
-- Durchgeführte Arbeiten
-- Verbaute Ersatzteile
-- Gesparte Kosten im Vergleich zum Neukauf
-- Statistik pro Gerät, Kategorie und Zeitraum
+## 8. Ersatzteil-Bestellungen
+
+Benötigte Teile werden direkt an einen Arbeitsschritt gehängt:
+
+1. Teil aus dem Ersatzteilkatalog auswählen
+2. Menge, Lieferant und geschätzte Kosten angeben (Retail-Preis wird als Vorschlag vorausgefüllt)
+3. Status der Bestellung mitverfolgen: DRAFT → ORDERED → SHIPPED → RECEIVED → INSTALLED / CANCELLED
+
+Wird ein Arbeitsschritt gelöscht, werden die zugehörigen Teilebestellungen automatisch mitgelöscht.
+
+## 9. Reparaturwert
+
+Auf der Detailseite (Kunden- und Staff-Sicht) wird der Reparaturwert angezeigt:
+
+- **Reparaturwert** (grün): Arbeitsstunden × Stundensatz + Teilekosten — was die Reparatur kosten würde
+- **Neukaufwert** (gelb): Katalogseitiger Kaufpreis eines neuen Geräts
+
+Da die Reparaturen kostenlos sind, zeigt die Tile den vollen Wert der Dienstleistung.
+
+## 10. Abschluss und Archiv
+
+Sobald alle Schritte erledigt sind, kann das Team die Anfrage als **COMPLETED** markieren. Anschließend lässt sie sich archivieren (**ARCHIVED**). Abgeschlossene Aufträge sind im Verlauf unter `/staff/history` weiterhin einsehbar.

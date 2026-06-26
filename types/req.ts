@@ -49,6 +49,11 @@ export const RepairRequestWithRelations = {
     },
     messageChannel: true,
     statusHistory: {
+        include: {
+            createdBy: {
+                select: { displayName: true, username: true },
+            },
+        },
         orderBy: {
             startedAt: 'desc',
         },

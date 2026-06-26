@@ -249,10 +249,24 @@ CREATE TABLE "RepairWorkItem" (
 CREATE TABLE "AppConfig" (
     "id" TEXT NOT NULL DEFAULT 'default',
     "hourlyRate" DECIMAL(12,2) NOT NULL DEFAULT 0,
+    "showTimelineToCustomer" BOOLEAN NOT NULL DEFAULT false,
+    "demoMode" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "AppConfig_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "DemoData" (
+    "id" TEXT NOT NULL DEFAULT 'singleton',
+    "userId" TEXT,
+    "requestIds" TEXT[],
+    "partIds" TEXT[],
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "DemoData_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -526,7 +540,7 @@ ALTER TABLE "PartOrder" ADD CONSTRAINT "PartOrder_deviceId_fkey" FOREIGN KEY ("d
 ALTER TABLE "PartOrder" ADD CONSTRAINT "PartOrder_catalogPartId_fkey" FOREIGN KEY ("catalogPartId") REFERENCES "PartCatalog"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "PartOrder" ADD CONSTRAINT "PartOrder_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "RepairWorkItem"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "PartOrder" ADD CONSTRAINT "PartOrder_workItemId_fkey" FOREIGN KEY ("workItemId") REFERENCES "RepairWorkItem"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "PartOrder" ADD CONSTRAINT "PartOrder_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE SET NULL ON UPDATE CASCADE;

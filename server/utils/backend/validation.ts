@@ -108,6 +108,8 @@ export const repairWorkItemCreateSchema = z.object({
 
 export const appConfigUpdateSchema = z.object({
     hourlyRate: z.number().min(0).max(9999),
+    showTimelineToCustomer: z.boolean().optional(),
+    demoMode: z.boolean().optional(),
 }).strict();
 
 export const partCatalogCreateSchema = z.object({

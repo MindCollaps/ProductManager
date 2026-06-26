@@ -1,0 +1,5 @@
+/home/nono/Documents/codeing/ProductManager/CLAUDE.md
+/home/nono/Documents/codeing/ProductManager/README.md
+/home/nono/Documents/codeing/ProductManager/docs/features.md
+/home/nono/Documents/codeing/ProductManager/docs/repair-flow.md
+/home/nono/Documents/codeing/ProductManager/public/CHANGELOG.md

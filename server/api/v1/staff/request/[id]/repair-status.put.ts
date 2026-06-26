@@ -2,8 +2,7 @@ import { RepairRequestStatus, RepairStatus } from '@prisma/client';
 import { z } from 'zod';
 
 import { createApiError } from '~~/server/utils/apiResponses';
-import { createNotification } from '~~/server/realtime/notifications';
-import { setRepairStatus } from '~~/server/utils/backend/repairStatus';
+import { applyRepairStatusAndNotify } from '~~/server/utils/backend/repairStatus';
 
 const repairStatusSchema = z.object({
     status: z.nativeEnum(RepairStatus),
@@ -37,14 +36,7 @@ export default defineEventHandler(async event => {
         throw createApiError('Cannot update repair status for closed request', 400);
     }
 
-    const statusHistory = await setRepairStatus(requestId, body.status, userId, body.note);
-
-    await createNotification({
-        userId: request.customerId,
-        requestId,
-        subject: 'Repair status changed',
-        body: `Repair status is now ${ body.status }`,
-    });
+    const statusHistory = await applyRepairStatusAndNotify(requestId, body.status, request.customerId, userId, body.note);
 
     return {
         message: 'Repair status updated',

@@ -2,6 +2,8 @@ import { defineNitroPlugin } from 'nitropack/runtime';
 import { createUser } from '../../server/utils/backend/user';
 import { initJWTSecret } from '../../server/utils/crypto/jwt';
 import { prisma } from '../../server/utils/prisma';
+import { applyDemoSeed, clearDemoSeed } from '../../server/utils/backend/demoSeed';
+import { getOrCreateAppConfig } from '../../server/utils/backend/config';
 
 
 export default defineNitroPlugin(async () => {
@@ -14,6 +16,7 @@ export default defineNitroPlugin(async () => {
     }
 
     await initializeAdminUser();
+    await initializeDemoMode();
 
     const jwtInitialized = initJWTSecret();
     if (jwtInitialized) {
@@ -23,6 +26,34 @@ export default defineNitroPlugin(async () => {
         throw new Error('Failed to initialize JWT keys');
     }
 });
+
+async function initializeDemoMode() {
+    const envValue = process.env.DEMO_MODE;
+
+    if (envValue === undefined) {
+        return;
+    }
+
+    const envDemo = envValue === 'true';
+    const config = await getOrCreateAppConfig();
+
+    if (envDemo === config.demoMode) {
+        return;
+    }
+
+    if (envDemo) {
+        console.log('[Demo] DEMO_MODE=true — applying demo seed...');
+        await applyDemoSeed();
+        await prisma.appConfig.update({ where: { id: 'default' }, data: { demoMode: true } });
+        console.log('[Demo] Demo seed applied.');
+    }
+    else {
+        console.log('[Demo] DEMO_MODE=false — clearing demo seed...');
+        await clearDemoSeed();
+        await prisma.appConfig.update({ where: { id: 'default' }, data: { demoMode: false } });
+        console.log('[Demo] Demo seed cleared.');
+    }
+}
 
 async function initializeAdminUser() {
     const username = process.env.ADMIN_USERNAME;

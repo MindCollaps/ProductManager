@@ -5,5 +5,7 @@ export default defineEventHandler(async () => {
 
     return {
         hourlyRate: config.hourlyRate,
+        showTimelineToCustomer: config.showTimelineToCustomer,
+        demoMode: config.demoMode,
     };
 });

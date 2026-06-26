@@ -4,6 +4,13 @@
         :title="`Reperaturauftrag von ${ repairReq?.customer.displayName }`"
     >
         <ui-status :status="displayStatus"/>
+        <repair-savings-tile :summary="savingsSummary"/>
+        <div
+            v-if="showTimeline"
+            class="request-timeline"
+        >
+            <repair-timeline :history="repairReq.statusHistory"/>
+        </div>
         <div
             v-if="isCompletedView"
             class="request-compact"
@@ -18,8 +25,6 @@
                 </template>
                 <ui-button @click="openChat()">Chat</ui-button>
             </div>
-
-            <repair-savings-tile :summary="savingsSummary"/>
 
             <div class="request-steps">
                 <repair-step-graph
@@ -87,7 +92,6 @@
                     <h3>Noch nicht erstellt</h3>
                 </template>
             </div>
-            <repair-savings-tile :summary="savingsSummary"/>
             <div class="request-steps">
                 <repair-step-graph
                     :editable="false"
@@ -103,6 +107,7 @@ import { RepairRequestStatus } from '@prisma/client';
 
 import LabeledText from '~/components/ui/LabeledText.vue';
 import RepairSavingsTile from '~/components/repair/RepairSavingsTile.vue';
+import RepairTimeline from '~/components/repair/RepairTimeline.vue';
 import { calculateRepairSavings } from '~~/app/utils/repairSavings';
 import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
@@ -139,6 +144,8 @@ const displayStatus = computed(() => {
     return repairReq.value.status;
 });
 const isCompletedView = computed(() => repairReq.value?.status === RepairRequestStatus.COMPLETED);
+const showTimeline = computed(() => (config.value?.showTimelineToCustomer ?? false) &&
+    (repairReq.value?.statusHistory?.length ?? 0) > 0);
 const hourlyRate = computed(() => Number(config.value?.hourlyRate ?? 0));
 const savingsSummary = computed(() => {
     if (!repairReq.value) {
@@ -237,6 +244,13 @@ async function openChat() {
     }
 
     &-steps {
+        padding: 16px;
+        border-radius: 8px;
+        background: $darkgray800;
+    }
+
+    &-timeline {
+        width: 100%;
         padding: 16px;
         border-radius: 8px;
         background: $darkgray800;

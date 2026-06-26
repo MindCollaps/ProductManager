@@ -1,5 +1,11 @@
 <template>
     <common-page title="Login">
+        <div
+            v-if="demoMode"
+            class="login-demo-hint"
+        >
+            Demo aktiv – melde dich mit <strong>demo</strong> / <strong>demo</strong> an, um aktive Aufträge zu sehen.
+        </div>
         <common-box>
             <ui-input-text
                 v-model="username"
@@ -23,6 +29,7 @@
 import { ToastMode } from '~~/types/toast';
 import { useToastManager } from '~/composables/toastManager';
 import { useStore } from '~/store';
+import type { AppConfigResponse } from '~~/types/config';
 
 const { showToast } = useToastManager();
 const store = useStore();
@@ -30,6 +37,9 @@ const store = useStore();
 const router = useRouter();
 const username = ref<string>();
 const password = ref<string>();
+
+const { data: publicConfig } = await useFetch<AppConfigResponse>('/api/v1/user/config');
+const demoMode = computed(() => publicConfig.value?.demoMode ?? false);
 
 interface LoginResponse {
     redirect?: string;
@@ -68,3 +78,20 @@ async function login() {
     }
 }
 </script>
+
+<style scoped lang="scss">
+.login-demo-hint {
+    width: min(360px, 100%);
+    margin-right: auto;
+    margin-bottom: 16px;
+    margin-left: auto;
+    padding: 10px 14px;
+    border-radius: 8px;
+
+    font-size: 13px;
+    line-height: 1.5;
+    color: $warning700Orig;
+
+    background: rgba($warning500Orig, 0.15);
+}
+</style>
