@@ -12,13 +12,13 @@ export default crud(prisma.workItemType, {
 
             const workItemTypes = await prisma.workItemType.findMany({
                 where: filtering
-  ? {
-      sortOrder: {
-        ...(minOrder !== undefined ? { gte: minOrder } : {}),
-        ...(maxOrder !== undefined ? { lte: maxOrder } : {}),
-      },
-    }
-  : undefined,
+                    ? {
+                        sortOrder: {
+                            ...(minOrder !== undefined ? { gte: minOrder } : {}),
+                            ...(maxOrder !== undefined ? { lte: maxOrder } : {}),
+                        },
+                    }
+                    : undefined,
                 orderBy: { name: 'asc' },
             });
 

@@ -40,17 +40,17 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
             icon: 'material-symbols:person',
             hide: !store.me?.isAdmin && !store.me?.isStaff,
             children: [
-                 {
-            text: 'Request',
-            icon: 'material-symbols:search',
-            path: '/staff/request',
-        },
-         {
-            text: 'History',
-            icon: 'material-symbols:history',
-            path: '/staff/history',
-        },
-            ]
+                {
+                    text: 'Request',
+                    icon: 'material-symbols:search',
+                    path: '/staff/request',
+                },
+                {
+                    text: 'History',
+                    icon: 'material-symbols:history',
+                    path: '/staff/history',
+                },
+            ],
         },
         {
             text: 'Admin',
