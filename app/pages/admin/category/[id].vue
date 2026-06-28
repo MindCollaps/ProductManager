@@ -14,11 +14,11 @@ const { id, page, syncPage, save: saveToApi, cancel } = useAdminEdit('/api/v1/ad
 const { data: category } = useFetch<DeviceCategory>(() => `/api/v1/admin/device-category/${ id.value }`);
 
 watch([category, id], () => {
-    syncPage('Create Device Category', 'Edit Device Category', [
+    syncPage('Neue Kategorie', 'Kategorie bearbeiten', [
         { label: 'Name', type: 'text', value: category.value?.name || '' },
         { label: 'Slug', type: 'label', value: category.value?.slug || '' },
-        { label: 'Description', type: 'text', value: category.value?.description || '' },
-        { label: 'Color', type: 'color', value: category.value?.color || '' },
+        { label: 'Beschreibung', type: 'text', value: category.value?.description || '' },
+        { label: 'Farbe', type: 'color', value: category.value?.color || '' },
     ]);
 }, { immediate: true });
 

@@ -5,25 +5,26 @@
 <script setup lang="ts">
 import type { DeviceCategory } from '@prisma/client';
 import type { ParametersPage } from '~~/types/components';
+import { ToastMode } from '~~/types/toast';
 
 const router = useRouter();
+const { showToast } = useToastManager();
 
 const { data: categories, refresh: refreshCategories } = useFetch<DeviceCategory[]>('/api/v1/admin/device-category');
 const params: ComputedRef<ParametersPage> = computed(() => {
     return {
         editable: true,
         removeable: true,
-        title: 'Categories',
+        title: 'Kategorien',
         onCreate: '/admin/category/new',
         entries: categories.value?.map(category => ({
-            onDelete: () => {
-                const confirmer = confirm(`Bist du sicher dass du ${ category.name } loeschen willst?`);
-
-                if (confirmer) {
-                    $fetch(`/api/v1/admin/category/${ category.id }`, {
-                        method: 'DELETE',
-                    });
-                    refreshCategories();
+            onDelete: async () => {
+                try {
+                    await $fetch(`/api/v1/admin/category/${ category.id }`, { method: 'DELETE' });
+                    await refreshCategories();
+                }
+                catch {
+                    showToast({ message: 'Fehler beim Löschen', mode: ToastMode.Error });
                 }
             },
             onEdit: () => {
@@ -41,12 +42,12 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                     value: category.slug ?? '',
                 },
                 {
-                    label: 'Desciption',
+                    label: 'Beschreibung',
                     type: 'text',
                     value: category.description ?? '',
                 },
                 {
-                    label: 'Color',
+                    label: 'Farbe',
                     type: 'color',
                     value: category.color ?? '',
                 },

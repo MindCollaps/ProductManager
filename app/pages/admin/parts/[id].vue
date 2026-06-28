@@ -14,13 +14,13 @@ const { id, page, syncPage, save: saveToApi, cancel } = useAdminEdit('/api/v1/ad
 const { data: part } = useFetch<PartCatalogEntry>(() => `/api/v1/admin/part-catalog/${ id.value }`);
 
 watch([part, id], () => {
-    syncPage('Create catalog part', 'Edit catalog part', [
+    syncPage('Neues Ersatzteil', 'Ersatzteil bearbeiten', [
         { label: 'Name', type: 'text', value: part.value?.name ?? '' },
-        { label: 'Manufacturer', type: 'text', value: part.value?.manufacturer ?? '' },
+        { label: 'Hersteller', type: 'text', value: part.value?.manufacturer ?? '' },
         { label: 'SKU', type: 'text', value: part.value?.sku ?? '' },
-        { label: 'Description', type: 'text', value: part.value?.description ?? '' },
-        { label: 'Unit Cost', type: 'number', value: Number(part.value?.unitCost ?? 0) },
-        { label: 'Retail Price', type: 'number', value: Number(part.value?.retailPrice ?? 0) },
+        { label: 'Beschreibung', type: 'text', value: part.value?.description ?? '' },
+        { label: 'Einkaufspreis', type: 'number', value: Number(part.value?.unitCost ?? 0) },
+        { label: 'Verkaufspreis', type: 'number', value: Number(part.value?.retailPrice ?? 0) },
     ]);
 }, { immediate: true });
 

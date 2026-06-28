@@ -27,8 +27,8 @@ defineSlots<{ default(): unknown }>();
 <style scoped lang="scss">
 .settings-section {
     overflow: hidden;
-    border-radius: 10px;
-    background: $darkgray800;
+    border-radius: 8px;
+    background: $darkgray875;
 
     &-header {
         padding: 16px 20px;

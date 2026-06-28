@@ -26,10 +26,11 @@ export function useAdminEdit(apiBase: string, listPath: string) {
                 method: id.value === 'new' ? 'POST' : 'PUT',
                 body,
             });
-            showToast({ message: 'Saved' });
+            showToast({ message: 'Gespeichert' });
+            router.push(listPath);
         }
         catch {
-            showToast({ message: 'Save failed' });
+            showToast({ message: 'Fehler beim Speichern' });
         }
     }
 

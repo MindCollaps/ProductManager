@@ -8,7 +8,7 @@ export interface EditPage {
 
 export interface EditPageField {
     label: string;
-    type: 'text' | 'number' | 'checkbox' | 'category' | 'label' | 'color' | 'brand';
+    type: 'text' | 'text-area' | 'icon' | 'number' | 'checkbox' | 'category' | 'label' | 'color' | 'brand';
     value?: string | DeviceCategory[] | DeviceBrand | number | boolean | null | undefined;
     options?: string[]; // For select type
 }
@@ -29,6 +29,6 @@ export interface ParametersPageEntry {
 
 export interface ParametersPageField {
     label: string;
-    type: 'text' | 'color' | 'category';
+    type: 'text' | 'color' | 'category' | 'icon';
     value: string | DeviceCategory[];
 }

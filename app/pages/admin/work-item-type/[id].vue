@@ -16,15 +16,15 @@ const { id, page, syncPage, save: saveToApi, cancel } = useAdminEdit('/api/v1/ad
 const { data: workItemType } = useFetch<WorkItemTypeWithDefault>(() => `/api/v1/admin/work-item-type/${ id.value }`);
 
 watch([workItemType, id], () => {
-    syncPage('Create Work Item Type', 'Edit Work Item Type', [
+    syncPage('Neuer Aufgabentyp', 'Aufgabentyp bearbeiten', [
         { label: 'Name', type: 'text', value: workItemType.value?.name || '' },
         { label: 'Slug', type: 'label', value: workItemType.value?.slug || '' },
-        { label: 'Description', type: 'text', value: workItemType.value?.description || '' },
-        { label: 'Color', type: 'color', value: workItemType.value?.color || '' },
-        { label: 'Icon', type: 'text', value: workItemType.value?.icon || '' },
-        { label: 'Sort Order', type: 'number', value: workItemType.value?.sortOrder ?? 0 },
-        { label: 'Labor Minutes', type: 'number', value: workItemType.value?.laborMinutes ?? 0 },
-        { label: 'Default Step', type: 'checkbox', value: workItemType.value?.isDefault ?? false },
+        { label: 'Beschreibung', type: 'text-area', value: workItemType.value?.description || '' },
+        { label: 'Farbe', type: 'color', value: workItemType.value?.color || '' },
+        { label: 'Icon', type: 'icon', value: workItemType.value?.icon || '' },
+        { label: 'Reihenfolge', type: 'number', value: workItemType.value?.sortOrder ?? 0 },
+        { label: 'Arbeitsminuten', type: 'number', value: workItemType.value?.laborMinutes ?? 0 },
+        { label: 'Standardschritt', type: 'checkbox', value: workItemType.value?.isDefault ?? false },
     ]);
 }, { immediate: true });
 
@@ -35,6 +35,7 @@ async function save() {
         description: page.value.fields[2]?.value as string,
         color: page.value.fields[3]?.value as string,
         icon: page.value.fields[4]?.value as string,
+        sortOrder: Number(page.value.fields[5]?.value as number),
         laborMinutes: Number(page.value.fields[6]?.value as number),
         isDefault: Boolean(page.value.fields[7]?.value),
     });

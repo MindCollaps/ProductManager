@@ -47,6 +47,8 @@ useLayout();
 <style scoped lang="scss">
 .header {
     position: sticky;
+    z-index: 50;
+    top: 0;
 
     display: grid;
     grid-template-columns: 0.5fr 2fr 0.5fr;

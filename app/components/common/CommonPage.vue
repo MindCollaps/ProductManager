@@ -1,6 +1,13 @@
 <template>
     <div class="common-page">
-        <h1>{{ title }}</h1>
+        <div
+            v-if="$slots['actions']"
+            class="common-page-header"
+        >
+            <h1>{{ title }}</h1>
+            <slot name="actions"/>
+        </div>
+        <h1 v-else>{{ title }}</h1>
         <slot/>
     </div>
 </template>
@@ -12,6 +19,7 @@ defineProps<{
 
 defineSlots<{
     default: () => any;
+    actions?: () => any;
 }>();
 </script>
 
@@ -25,8 +33,10 @@ defineSlots<{
     padding: 32px;
 
     h1 {
+        margin: 0;
         font-size: 38px;
         font-weight: bold;
+        text-wrap: balance;
 
         @include mobile {
             font-size: 32px;
@@ -39,6 +49,15 @@ defineSlots<{
         @include mobile {
             font-size: 12px;
         }
+    }
+
+    &-header {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        justify-content: space-between;
+
+        width: 100%;
     }
 }
 </style>

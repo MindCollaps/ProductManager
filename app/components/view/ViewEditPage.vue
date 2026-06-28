@@ -17,6 +17,16 @@
                     v-if="field.type === 'checkbox'"
                     v-model="field.value as boolean"
                 >{{ field.label }}</ui-checkbox>
+                <ui-text-area
+                    v-if="field.type === 'text-area'"
+                    v-model="field.value as string"
+                >
+                    {{ field.label }}
+                </ui-text-area>
+                <ui-icon-picker
+                    v-if="field.type === 'icon'"
+                    v-model="field.value as string"
+                >{{ field.label }}</ui-icon-picker>
                 <common-selector
                     v-if="field.type === 'category'"
                     v-model="field.value as DeviceCategory[]"
@@ -54,7 +64,7 @@
                 <ui-input-text
                     v-if="field.type === 'label'"
                     v-model="field.value as string"
-                    class="checkbox_text"
+                    class="edit-page-label-field"
                     :disabled="!page.isNew"
                 >
                     {{ field.label }}
@@ -68,15 +78,15 @@
                 </ui-color-picker>
             </template>
         </div>
-        <div class="edit-page-controll">
+        <div class="edit-page-control">
             <ui-button
                 type="primary"
-                @click="$emit('save', $event)"
-            >Save</ui-button>
+                @click="handleSave"
+            >Speichern</ui-button>
             <ui-button
                 type="secondary"
-                @click="$emit('cancel', $event)"
-            >Cancel</ui-button>
+                @click="handleCancel"
+            >Abbrechen</ui-button>
         </div>
     </common-page>
 </template>
@@ -92,7 +102,7 @@ defineProps({
     },
 });
 
-defineEmits({
+const emit = defineEmits({
     save(e: MouseEvent) {
         return true;
     },
@@ -100,6 +110,20 @@ defineEmits({
         return true;
     },
 });
+
+function closeOverlays() {
+    document.dispatchEvent(new Event('edit-page:close-overlays'));
+}
+
+function handleSave(e: MouseEvent) {
+    closeOverlays();
+    emit('save', e);
+}
+
+function handleCancel(e: MouseEvent) {
+    closeOverlays();
+    emit('cancel', e);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -107,11 +131,13 @@ defineEmits({
     display: flex;
     flex-direction: column;
     gap: 16px;
+    width: min(640px, 100%);
 }
 
-.edit-page-controll {
+.edit-page-control {
     display: flex;
     gap: 16px;
     justify-content: flex-end;
+    width: min(640px, 100%);
 }
 </style>

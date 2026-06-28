@@ -54,12 +54,8 @@ const compValue = computed(() => {
 
     &_label {
         margin-bottom: 8px;
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 600;
-
-        @include mobile {
-            font-size: 13px;
-        }
     }
 
     &_container {

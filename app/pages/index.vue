@@ -225,8 +225,8 @@ onMounted(() => {
     // Cursor-driven parallax layer — uses `translate` CSS individual property
     // which composes with animejs's `transform` without conflict
     const handlePointerMove = (e: PointerEvent) => {
-        const cx = e.clientX / window.innerWidth - 0.5;
-        const cy = e.clientY / window.innerHeight - 0.5;
+        const cx = (e.clientX / window.innerWidth) - 0.5;
+        const cy = (e.clientY / window.innerHeight) - 0.5;
         orbs.forEach((orb, i) => {
             const depth = (i + 1) * 14;
             orb.style.setProperty('--px', `${ cx * depth }px`);

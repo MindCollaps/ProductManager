@@ -14,7 +14,7 @@ const { id, page, syncPage, save: saveToApi, cancel } = useAdminEdit('/api/v1/ad
 const { data: brand } = useFetch<DeviceBrand>(() => `/api/v1/admin/brand/${ id.value }`);
 
 watch([brand, id], () => {
-    syncPage('Create Device Brand', 'Edit Device Brand', [
+    syncPage('Neue Marke', 'Marke bearbeiten', [
         { label: 'Name', type: 'text', value: brand.value?.name || '' },
     ]);
 }, { immediate: true });

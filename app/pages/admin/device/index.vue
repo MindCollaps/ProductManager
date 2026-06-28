@@ -5,25 +5,26 @@
 <script setup lang="ts">
 import type { ParametersPage } from '~~/types/components';
 import type { DeviceWithRelationsType } from '~~/types/req';
+import { ToastMode } from '~~/types/toast';
 
 const router = useRouter();
+const { showToast } = useToastManager();
 
 const { data: devices, refresh: refreshDevices } = useFetch<DeviceWithRelationsType[]>('/api/v1/admin/device');
 const params: ComputedRef<ParametersPage> = computed(() => {
     return {
         editable: true,
         removeable: true,
-        title: 'Devices',
+        title: 'Geräte',
         onCreate: '/admin/device/new',
         entries: devices.value?.map(device => ({
-            onDelete: () => {
-                const confirmer = confirm(`Bist du sicher dass du ${ device.name } Loeschen willst?`);
-
-                if (confirmer) {
-                    $fetch(`/api/v1/staff/device/${ device.id }`, {
-                        method: 'DELETE',
-                    });
-                    refreshDevices();
+            onDelete: async () => {
+                try {
+                    await $fetch(`/api/v1/staff/device/${ device.id }`, { method: 'DELETE' });
+                    await refreshDevices();
+                }
+                catch {
+                    showToast({ message: 'Fehler beim Löschen', mode: ToastMode.Error });
                 }
             },
             onEdit: () => {
@@ -36,7 +37,7 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                     value: device.name,
                 },
                 {
-                    label: 'Brand',
+                    label: 'Marke',
                     type: 'text',
                     value: device.deviceBrand.name,
                 },

@@ -5,27 +5,28 @@
 <script setup lang="ts">
 import type { WorkItemType } from '@prisma/client';
 import type { ParametersPage } from '~~/types/components';
+import { ToastMode } from '~~/types/toast';
 
 type WorkItemTypeWithDefault = WorkItemType & { laborMinutes: number | null; isDefault: boolean };
 
 const router = useRouter();
+const { showToast } = useToastManager();
 
 const { data: workItemTypes, refresh: refreshWorkItemTypes } = useFetch<WorkItemTypeWithDefault[]>('/api/v1/admin/work-item-type');
 const params: ComputedRef<ParametersPage> = computed(() => {
     return {
         editable: true,
         removeable: true,
-        title: 'Work Item Types',
+        title: 'Aufgabentypen',
         onCreate: '/admin/work-item-type/new',
         entries: workItemTypes.value?.map(workItemType => ({
-            onDelete: () => {
-                const confirmer = confirm(`Bist du sicher dass du ${ workItemType.name } loeschen willst?`);
-
-                if (confirmer) {
-                    $fetch(`/api/v1/admin/work-item-type/${ workItemType.id }`, {
-                        method: 'DELETE',
-                    });
-                    refreshWorkItemTypes();
+            onDelete: async () => {
+                try {
+                    await $fetch(`/api/v1/admin/work-item-type/${ workItemType.id }`, { method: 'DELETE' });
+                    await refreshWorkItemTypes();
+                }
+                catch {
+                    showToast({ message: 'Fehler beim Löschen', mode: ToastMode.Error });
                 }
             },
             onEdit: () => {
@@ -43,34 +44,34 @@ const params: ComputedRef<ParametersPage> = computed(() => {
                     value: workItemType.slug,
                 },
                 {
-                    label: 'Description',
+                    label: 'Beschreibung',
                     type: 'text',
                     value: workItemType.description ?? '',
                 },
                 {
-                    label: 'Color',
+                    label: 'Farbe',
                     type: 'color',
                     value: workItemType.color ?? '',
                 },
                 {
                     label: 'Icon',
-                    type: 'text',
+                    type: 'icon',
                     value: workItemType.icon ?? '',
                 },
                 {
-                    label: 'Sort Order',
+                    label: 'Reihenfolge',
                     type: 'text',
                     value: workItemType.sortOrder?.toString() ?? '',
                 },
                 {
-                    label: 'Labor Minutes',
+                    label: 'Arbeitsminuten',
                     type: 'text',
                     value: workItemType.laborMinutes?.toString() ?? '',
                 },
                 {
-                    label: 'Default Step',
+                    label: 'Standardschritt',
                     type: 'text',
-                    value: workItemType.isDefault ? 'Yes' : 'No',
+                    value: workItemType.isDefault ? 'Ja' : 'Nein',
                 },
             ],
 

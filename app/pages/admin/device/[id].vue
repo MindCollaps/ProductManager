@@ -15,11 +15,11 @@ const { id, page, syncPage, save: saveToApi, cancel } = useAdminEdit('/api/v1/ad
 const { data: device } = useFetch<DeviceWithRelationsType>(() => `/api/v1/admin/device/${ id.value }`);
 
 watch([device, id], () => {
-    syncPage('Create Device Type', 'Edit Device Type', [
+    syncPage('Neues Gerät', 'Gerät bearbeiten', [
         { label: 'Name', type: 'text', value: device.value?.name || '' },
-        { label: 'Description', type: 'text', value: device.value?.description || '' },
-        { label: 'Category', type: 'category', value: device.value?.deviceCategories?.map(e => e.category) ?? [] },
-        { label: 'Brand', type: 'label', value: device.value?.deviceBrand?.name ?? '' },
+        { label: 'Beschreibung', type: 'text', value: device.value?.description || '' },
+        { label: 'Kategorie', type: 'category', value: device.value?.deviceCategories?.map(e => e.category) ?? [] },
+        { label: 'Marke', type: 'label', value: device.value?.deviceBrand?.name ?? '' },
         { label: 'Neukaufpreis', type: 'number', value: device.value?.purchaseValue?.toString() ?? '' },
     ]);
 }, { immediate: true });
