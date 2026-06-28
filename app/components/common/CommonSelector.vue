@@ -127,7 +127,8 @@ const selectedItems = defineModel<T[]>({
 const focused = defineModel('focused', { type: Boolean });
 
 const propsPath = toRef(() => props.path);
-const { data: allEntries } = useFetch<T[]>(propsPath);
+const { data: allEntries, refresh: refreshEntries } = useFetch<T[]>(propsPath);
+watch(propsPath, () => refreshEntries());
 const leftEntries = computed(() => allEntries.value?.filter(e => !selectedItems.value?.some(s => s.id === e.id)));
 const searchText = ref('');
 const searchTextRef = useTemplateRef('searchText');
@@ -261,7 +262,7 @@ function onBlur(event: FocusEvent) {
             width: 18px;
             height: 18px;
             border: none;
-            border-radius: 3px;
+            border-radius: 4px;
 
             font-size: 16px;
             font-weight: 300;

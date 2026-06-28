@@ -14,7 +14,7 @@
                 <div class="step-phase-count">{{ phase.items.length }} step{{ phase.items.length === 1 ? '' : 's' }}</div>
                 <ui-button
                     v-if="editable"
-                    @click="emit('add', phase.startOrder)"
+                    @click="emit('add', phase.startOrder, phase.endOrder)"
                 >
                     Add step
                 </ui-button>
@@ -54,7 +54,7 @@
                     <p>This phase is part of the repair flow, but no work items have been created here yet.</p>
                     <ui-button
                         v-if="editable"
-                        @click="emit('add', phase.startOrder)"
+                        @click="emit('add', phase.startOrder, phase.endOrder)"
                     >
                         Add the first step
                     </ui-button>
@@ -80,7 +80,7 @@ defineProps({
 });
 
 const emit = defineEmits({
-    add(phaseStart: number) {
+    add(phaseStart: number, phaseEnd: number) {
         return true;
     },
 });
@@ -101,7 +101,7 @@ defineSlots<{
 
     padding: 20px;
     border: 1px solid $lightgray125;
-    border-radius: 24px;
+    border-radius: 16px;
 
     background: linear-gradient(180deg, rgb(255 255 255 / 5%), rgb(255 255 255 / 1%));
 
@@ -214,7 +214,7 @@ defineSlots<{
 
         padding: 18px;
         border: 1px dashed $lightgray125;
-        border-radius: 18px;
+        border-radius: 8px;
 
         background: rgb(255 255 255 / 2%);
 

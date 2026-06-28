@@ -1,8 +1,9 @@
 <template>
-    <article class="home-image-placeholder">
+    <article
+        class="home-image-placeholder"
+        :class="{ 'home-image-placeholder--featured': featured }"
+    >
         <div class="home-image-placeholder_frame">
-            <div class="home-image-placeholder_glow"/>
-            <div class="home-image-placeholder_label">{{ label }}</div>
             <img
                 v-if="image"
                 :alt="title"
@@ -19,6 +20,7 @@
                 <div class="home-image-placeholder_visual-line"/>
             </div>
         </div>
+        <p class="home-image-placeholder_label">{{ label }}</p>
         <h4 class="home-image-placeholder_title">{{ title }}</h4>
         <p class="home-image-placeholder_caption">{{ caption }}</p>
     </article>
@@ -30,6 +32,7 @@ defineProps<{
     title: string;
     caption: string;
     image?: string;
+    featured?: boolean;
 }>();
 </script>
 
@@ -39,83 +42,48 @@ defineProps<{
     flex-direction: column;
     gap: 10px;
 
+    &--featured {
+        height: 100%;
+
+        .home-image-placeholder_frame {
+            flex: 1;
+            min-height: 300px;
+        }
+    }
+
     &_frame {
         position: relative;
 
         overflow: hidden;
 
-        min-height: 170px;
-        padding: 14px;
-        border: none;
+        min-height: 180px;
         border-radius: 14px;
 
-        background: linear-gradient(120deg, varToRgba(darkgray900, 0.98), varToRgba(darkgray850, 0.95));
-
-        &::before {
-            content: none;
-        }
+        background: $darkgray875;
+        box-shadow: 0 0 0 1px varToRgba(info400, 0.15);
 
         &::after {
             pointer-events: none;
             content: '';
 
             position: absolute;
-            z-index: 0;
+            z-index: 3;
             inset: 0;
 
             border-radius: inherit;
 
-            opacity: 0.9;
-            background:
-                radial-gradient(120px 24px at 7% 0%, varToRgba(info300, 0.34), transparent 72%),
-                radial-gradient(116px 20px at 92% 100%, varToRgba(primary300, 0.3), transparent 72%);
+            opacity: 0.25;
+            background: radial-gradient(160px 32px at 7% 0%, varToRgba(info300, 0.8), transparent 72%);
         }
-
-        > * {
-            position: relative;
-            z-index: 1;
-        }
-    }
-
-    &_glow {
-        position: absolute;
-        top: -55%;
-        right: -35%;
-
-        width: 210px;
-        height: 210px;
-        border-radius: 50%;
-
-        background: radial-gradient(circle, varToRgba(info500, 0.5) 0%, varToRgba(info500, 0) 68%);
-        filter: blur(5px);
-    }
-
-    &_label {
-        position: relative;
-        z-index: 1;
-
-        width: fit-content;
-        padding: 4px 9px;
-        border: 1px solid varToRgba(info500, 0.6);
-        border-radius: 999px;
-
-        font-size: 11px;
-        font-weight: 700;
-        color: $lightgray0;
-        letter-spacing: 0.04em;
-
-        background: varToRgba(info700, 0.3);
     }
 
     &_img {
-        position: relative;
+        position: absolute;
         z-index: 1;
+        inset: 0;
 
-        display: block;
-
-        width: calc(100% + 28px);
-        margin: 10px -14px -14px;
-        border-radius: 0 0 14px 14px;
+        width: 100%;
+        height: 100%;
 
         object-fit: cover;
         object-position: top;
@@ -129,7 +97,8 @@ defineProps<{
         grid-template-columns: 1fr;
         gap: 8px;
 
-        margin-top: 20px;
+        padding: 14px;
+        padding-top: 20px;
     }
 
     &_visual-line {
@@ -147,6 +116,16 @@ defineProps<{
         border-radius: 10px;
         background: linear-gradient(130deg, varToRgba(primary500, 0.3), varToRgba(info400, 0.28));
         box-shadow: inset 0 0 0 1px varToRgba(lightgray125, 0.35);
+    }
+
+    &_label {
+        margin: 0;
+
+        font-size: 11px;
+        font-weight: 600;
+        color: $info400;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
     }
 
     &_title {

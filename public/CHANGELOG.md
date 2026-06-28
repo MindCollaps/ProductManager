@@ -1,5 +1,62 @@
 # Changelog
 
+## v0.0.6
+
+### Dashboard (Komplettüberarbeitung)
+
+- **Rollenbasiert:** Das Dashboard zeigt je nach Nutzerrolle unterschiedliche Inhalte auf einen Blick.
+- **Warteschlange (Staff/Admin):** Live-Kachel mit Zähler für prüfpflichtige und aktive Anfragen; eingebettete Liste der fünf dringlichsten offenen Aufträge (WAITING_FOR_REVIEW zuerst), inkl. Skeleton-Ladezustand.
+- **Statistiken (Staff/Admin):** Neue Statistiken-Kachel mit vier Abschnitten:
+  - *Geräte* – meistreparierten Geräte aus dem Katalog; Freitext-Marken als Fallback für nicht verknüpfte Anfragen.
+  - *Häufige Defekte* – häufigste Arbeitsschritttypen der Reparaturphase (orderIndex 30–89), z. B. Batteriewechsel, Teileaustausch, Löten.
+  - *Meistgenutzte Teile* – am häufigsten bestellte Ersatzteile aus Reparaturschritten.
+  - *Team-Auswertung* – aktive und abgeschlossene Aufträge pro Mitarbeiter (nur sichtbar bei mehr als einem Mitarbeiter).
+- **Schnellzugriff (Admin):** Kachelraster mit Direktlinks zu allen Verwaltungsbereichen (Geräte, Kategorien, Marken, Schritttypen, Ersatzteile, Konfiguration).
+- **Verlauf-Link (Staff):** Direktlink zu `/staff/history`.
+- **Kunden:** Kachel mit eigenen aktiven Anfragen und Statusbadges; Leer-Zustand mit CTA zur neuen Anfrage; Link zur Gesamtübersicht.
+
+### Neue API
+
+- **`GET /api/v1/staff/stats`** – Liefert aggregierte Dashboard-Statistiken: meistreparierten Geräte, häufige Defekttypen (nach Arbeitsschritttyp), meistgenutzte Teile, Team-Auslastung. Nur für Staff und Admin.
+
+### Verlauf (`/staff/history`)
+
+- Skeleton-Ladezustand und Fehlerzustand mit „Erneut versuchen"-Button.
+- Deutsche Datumsformatierung (`TT.MM.JJJJ`).
+- Gerät, Modell und Marke als Mittelpunkt-getrennte Zeile; Fehlerbeschreibung zweizeilig gekürzt.
+- Reparaturstatus wird korrekt aus dem letzten `statusHistory`-Eintrag aufgelöst.
+
+### Profil (`/profile`)
+
+- Seite neu aufgebaut mit `SettingsSection`-Layout: Benutzername und Rolle strukturiert dargestellt.
+- Abmelden-Button als destruktive Aktion klar hervorgehoben.
+
+### Chat (`/chat/room/[id]`)
+
+- Überarbeitetes Layout: schmalere Nachrichtenblasen, klarere Zeitstempel, verbesserte Lesbarkeit eigener vs. fremder Nachrichten.
+- Skeleton-Ladezustand für den initialen Nachrichtenabruf.
+- Verbessertes Eingabefeld mit konsistentem Fokuszustand.
+
+### Benachrichtigungen (`ViewNotifications`)
+
+- Komplett überarbeitetes Panel: Zeitstempel, Markiert-als-gelesen-Logik und Leer-Zustand neu gestaltet.
+- Bessere visuelle Trennung zwischen gelesenen und ungelesenen Benachrichtigungen.
+
+### Reparatur-Ansicht
+
+- `RepairStepGraph`: überarbeitete Schritt-Phasen-Darstellung mit verbessertem Spacing und Statusfarben.
+- `RepairWorkItemCard`: kompakteres Layout, konsistente Abstände.
+
+### Startseite, Login & Registrierung
+
+- `index.vue`, `login.vue`, `signup.vue`: durchgehend überarbeitetes Design mit einheitlichen Formularelementen, verbesserter Typografie und responsivem Layout.
+
+### Navigation
+
+- `ViewMenu.vue`: überarbeitete Hauptnavigation mit klarerer aktiver-Link-Markierung und verbessertem mobilen Verhalten.
+
+---
+
 ## v0.5.0
 
 ### Staff-Anfragendetailseite (Komplettüberarbeitung)

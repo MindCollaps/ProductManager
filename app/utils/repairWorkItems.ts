@@ -88,6 +88,12 @@ export function getWorkItemPhaseDescription(orderIndex: number) {
     return phaseDefinition?.description ?? 'Arrival, handover, and the first checks before detailed work begins.';
 }
 
+export function getWorkItemPhaseEnd(startOrder: number): number {
+    const phaseDefinition = REPAIR_WORK_ITEM_PHASE_DEFINITIONS.find(definition => definition.startOrder === startOrder);
+
+    return phaseDefinition?.endOrder ?? startOrder + 9;
+}
+
 export function groupRepairWorkItemsByPhase<T extends RepairWorkItemPhaseItem>(workItems: T[]): RepairWorkItemPhase<T>[] {
     const sortedWorkItems = [...workItems].sort((left, right) => {
         if (left.orderIndex !== right.orderIndex) {

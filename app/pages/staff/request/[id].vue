@@ -32,6 +32,12 @@
                             {{ item.name }}
                         </template>
                     </common-selector>
+                    <ui-button
+                        v-if="store.me && selectedAssignedStaff[0]?.id !== store.me.id"
+                        @click="assignSelfToRequest"
+                    >
+                        Mir zuweisen
+                    </ui-button>
                 </div>
                 <ui-button @click="openChat()">{{ chatButtonText }}</ui-button>
                 <div
@@ -203,11 +209,13 @@ import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
 import { ToastMode } from '~~/types/toast';
 import { useToastManager } from '~/composables/toastManager';
+import { useStore } from '~/store';
 
 const route = useRoute();
 const id = route.params.id as string;
 const isVisible = ref(false);
 const { showToast } = useToastManager();
+const store = useStore();
 
 const displayName = ref('');
 const serialNumber = ref('');
@@ -446,6 +454,15 @@ async function saveRepairDevice() {
     finally {
         saveLoading.value = false;
     }
+}
+
+async function assignSelfToRequest() {
+    if (!store.me) return;
+    await $fetch(`/api/v1/staff/request/${ id }`, {
+        method: 'PUT',
+        body: { assignedStaffId: store.me.id },
+    });
+    await refreshRepairReq();
 }
 
 async function openChat() {
@@ -691,7 +708,7 @@ async function archiveRequest() {
     }
 
     &:focus-visible {
-        border-radius: 2px;
+        border-radius: 4px;
         color: $lightgray150;
         outline: 2px solid $primary500;
         outline-offset: 3px;

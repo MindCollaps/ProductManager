@@ -5,7 +5,7 @@
     >
         <div class="work-item-card-header">
             <div class="work-item-card-copy">
-                <div class="work-item-card-order">Order {{ item.orderIndex }}</div>
+                <div class="work-item-card-order">{{ item.orderIndex }}</div>
                 <div class="work-item-card-title">
                     <Icon
                         v-if="item.workItemType.icon"
@@ -25,10 +25,10 @@
         </div>
 
         <div class="work-item-card-meta">
-            <span>Assigned: {{ assignedStaffLabel }}</span>
+            <span>Bearbeiter: {{ assignedStaffLabel }}</span>
             <span v-if="item.laborMinutes !== null">{{ item.laborMinutes }} min</span>
-            <span v-if="item.completedAt">Completed</span>
-            <span v-if="item.workItemType.isDefault">Default</span>
+            <span v-if="item.completedAt">Abgeschlossen</span>
+            <span v-if="item.workItemType.isDefault">Standard</span>
         </div>
 
         <repair-work-item-parts
@@ -42,22 +42,28 @@
             v-if="editable"
             class="work-item-card-actions"
         >
-            <ui-button @click="emit('edit')">Edit</ui-button>
+            <ui-button @click="emit('edit')">Bearbeiten</ui-button>
+            <ui-button
+                v-if="currentUserId && item.assignedStaff?.id !== currentUserId"
+                @click="emit('assignSelf')"
+            >
+                Mir zuweisen
+            </ui-button>
             <ui-button
                 @click="emit('toggleInProgress')"
             >
-                {{ item.status === 'IN_PROGRESS' ? 'Set Pending' : 'Set In Progress' }}
+                {{ item.status === 'IN_PROGRESS' ? 'Ausstehend' : 'In Bearbeitung' }}
             </ui-button>
             <ui-button
                 @click="emit('toggleDone')"
             >
-                {{ item.status === 'DONE' ? 'Reopen' : 'Complete' }}
+                {{ item.status === 'DONE' ? 'Wiedereröffnen' : 'Erledigt' }}
             </ui-button>
             <ui-button
                 primary-color="error600"
                 @click="emit('delete')"
             >
-                Delete
+                Löschen
             </ui-button>
         </div>
     </div>
@@ -83,6 +89,10 @@ const props = defineProps({
         type: Array as PropType<PartOrderWithRelationsType[]>,
         default: () => [],
     },
+    currentUserId: {
+        type: String as PropType<string | null>,
+        default: null,
+    },
 });
 
 const emit = defineEmits({
@@ -104,6 +114,9 @@ const emit = defineEmits({
     changePartStatus(partId: string, status: PartOrderStatus) {
         return Boolean(partId) && Boolean(status);
     },
+    assignSelf() {
+        return true;
+    },
 });
 
 const cardStyle = computed(() => ({
@@ -121,10 +134,10 @@ const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.
     gap: 12px;
 
     padding: 16px;
-    border: 1px solid $lightgray150;
-    border-radius: 16px;
+    border: 1px solid $lightgray125;
+    border-radius: 8px;
 
-    background: linear-gradient(180deg, rgb(255 255 255 / 3%), rgb(255 255 255 / 1%));
+    background: $darkgray875;
 
     animation: card-enter 280ms cubic-bezier(0.25, 1, 0.5, 1) both;
     animation-delay: calc(min(var(--card-i, 0), 7) * 35ms);
@@ -132,7 +145,7 @@ const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.
     &-header {
         display: flex;
         gap: 12px;
-        align-items: start;
+        align-items: flex-start;
         justify-content: space-between;
     }
 
@@ -145,14 +158,12 @@ const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.
     &-order {
         width: fit-content;
         padding: 4px 8px;
-        border: 1px solid $lightgray150;
+        border: 1px solid $lightgray125;
         border-radius: 999px;
 
         font-size: 11px;
-        font-weight: 700;
-        color: $typographyPrimary;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
+        font-weight: 600;
+        color: $lightgray400;
 
         background: rgb(255 255 255 / 4%);
     }
@@ -172,11 +183,6 @@ const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.
         color: var(--accent-color);
     }
 
-    &-meta {
-        font-size: 12px;
-        color: $typographyPrimary;
-    }
-
     &-description {
         line-height: 1.4;
         color: $typographyPrimary;
@@ -186,6 +192,9 @@ const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+
+        font-size: 11px;
+        color: $lightgray400;
     }
 
     &-actions {

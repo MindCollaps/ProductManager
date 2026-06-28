@@ -1,5 +1,8 @@
 <template>
-    <article class="home-feature-card">
+    <article
+        class="home-feature-card"
+        :class="{ 'home-feature-card--large': large }"
+    >
         <div class="home-feature-card_icon-wrap">
             <div class="home-feature-card_icon">
                 <Icon :name="icon"/>
@@ -25,6 +28,7 @@ defineProps<{
     description: string;
     points: readonly string[];
     icon: string;
+    large?: boolean;
 }>();
 </script>
 
@@ -39,7 +43,6 @@ defineProps<{
 
     min-height: 240px;
     padding: 20px;
-    border: none;
     border-radius: 14px;
 
     background: linear-gradient(160deg, varToRgba(darkgray875, 0.95), varToRgba(darkgray950, 0.95));
@@ -76,6 +79,29 @@ defineProps<{
     @include hover {
         transform: translateY(-2px);
         box-shadow: 0 0 0 1px varToRgba(info300, 0.24), 0 28px 40px -30px varToRgba(info500, 0.7);
+    }
+
+    &--large {
+        gap: 14px;
+
+        .home-feature-card_icon-wrap {
+            padding: 10px;
+        }
+
+        .home-feature-card_icon {
+            width: 34px;
+            height: 34px;
+            font-size: 26px;
+        }
+
+        .home-feature-card_title {
+            font-size: 21px;
+        }
+
+        .home-feature-card_description {
+            font-size: 15px;
+            line-height: 1.6;
+        }
     }
 
     &_icon-wrap {

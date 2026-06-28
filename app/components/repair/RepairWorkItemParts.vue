@@ -1,18 +1,18 @@
 <template>
     <div class="work-item-parts">
         <div class="work-item-parts-header">
-            <h4>Parts</h4>
+            <h4>Ersatzteile</h4>
             <ui-button
                 v-if="editable"
                 size="S"
                 @click="emit('add')"
-            >Add part</ui-button>
+            >Teil hinzufügen</ui-button>
         </div>
 
         <div
             v-if="parts.length === 0"
             class="work-item-parts-empty"
-        >No parts assigned</div>
+        >Keine Teile zugewiesen</div>
 
         <div
             v-for="part in parts"
@@ -20,9 +20,9 @@
             class="work-item-parts-item"
         >
             <div class="work-item-parts-copy">
-                <strong>{{ part.orderedName }}</strong>
-                <span>Qty {{ part.quantity }}</span>
-                <span>{{ part.status }}</span>
+                <strong>{{ part.orderedName ?? 'Unbekanntes Teil' }}</strong>
+                <span>{{ part.quantity }}×</span>
+                <span>{{ statusLabel(part.status) }}</span>
             </div>
             <div
                 v-if="editable"
@@ -33,7 +33,7 @@
                     :key="status"
                     size="S"
                     @click="emit('transition', part.id, status)"
-                >{{ status }}</ui-button>
+                >{{ transitionLabel(status) }}</ui-button>
             </div>
         </div>
     </div>
@@ -66,7 +66,35 @@ const emit = defineEmits({
     },
 });
 
-function nextStatuses(status: PartOrderStatus) {
+const STATUS_LABELS: Record<PartOrderStatus, string> = {
+    DRAFT: 'Entwurf',
+    ORDERED: 'Bestellt',
+    SHIPPED: 'Versendet',
+    RECEIVED: 'Eingegangen',
+    ALREADY_IN_STOCK: 'Auf Lager',
+    INSTALLED: 'Eingebaut',
+    CANCELLED: 'Storniert',
+};
+
+const TRANSITION_LABELS: Record<PartOrderStatus, string> = {
+    DRAFT: 'Entwurf',
+    ORDERED: 'Bestellen',
+    SHIPPED: 'Versendet',
+    RECEIVED: 'Eingegangen',
+    ALREADY_IN_STOCK: 'Lagerware',
+    INSTALLED: 'Einbauen',
+    CANCELLED: 'Stornieren',
+};
+
+function statusLabel(status: PartOrderStatus): string {
+    return STATUS_LABELS[status] ?? status;
+}
+
+function transitionLabel(status: PartOrderStatus): string {
+    return TRANSITION_LABELS[status] ?? status;
+}
+
+function nextStatuses(status: PartOrderStatus): PartOrderStatus[] {
     return partOrderTransitions[status] ?? [];
 }
 </script>
@@ -88,13 +116,13 @@ function nextStatuses(status: PartOrderStatus) {
         h4 {
             margin: 0;
             font-size: 13px;
+            font-weight: 600;
         }
     }
 
     &-empty {
-        font-size: 12px;
-        color: $typographyPrimary;
-        opacity: 0.75;
+        font-size: 11px;
+        color: $lightgray400;
     }
 
     &-item {
@@ -104,9 +132,9 @@ function nextStatuses(status: PartOrderStatus) {
 
         padding: 10px;
         border: 1px solid $lightgray125;
-        border-radius: 10px;
+        border-radius: 8px;
 
-        background: rgb(255 255 255 / 2%);
+        background: $darkgray850;
     }
 
     &-copy {
@@ -115,8 +143,8 @@ function nextStatuses(status: PartOrderStatus) {
         gap: 8px;
 
         span {
-            font-size: 12px;
-            color: $typographyPrimary;
+            font-size: 11px;
+            color: $lightgray400;
         }
     }
 

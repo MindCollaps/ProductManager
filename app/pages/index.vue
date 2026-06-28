@@ -10,61 +10,75 @@
                 <div class="landing_orb landing_orb--three neon-orb"/>
             </div>
 
+            <!-- Hero: split layout — content left, screenshot right -->
             <common-neon-runner-container
                 as="section"
                 class="landing_hero"
                 tone="info"
             >
-                <span
-                    class="landing_badge"
-                    data-hero-item
-                >Reparatur, Kommunikation, Fortschritt</span>
-                <h2
-                    class="landing_title"
-                    data-hero-item
-                >
-                    Alles zu deinem Serviceauftrag in einer klaren Ansicht.
-                </h2>
-                <p
-                    class="landing_subtitle"
-                    data-hero-item
-                >
-                    ProductManager verbindet Kundenkommunikation, Reparaturverlauf und Benachrichtigungen in einem einzigen Ablauf —
-                    so sehen Mitarbeiter und Kunden sofort, was als Nächstes dran ist.
-                </p>
-                <div
-                    class="landing_actions"
-                    data-hero-item
-                >
-                    <ui-button
-                        v-if="!store.me?.loggedIn"
-                        to="/signup"
+                <div class="landing_hero-inner">
+                    <div class="landing_hero-content">
+                        <h1
+                            class="landing_title"
+                            data-hero-item
+                        >
+                            Alles zu deinem Serviceauftrag in einer klaren Ansicht.
+                        </h1>
+                        <p
+                            class="landing_subtitle"
+                            data-hero-item
+                        >
+                            ProductManager verbindet Kundenkommunikation, Reparaturverlauf und Benachrichtigungen in einem Ablauf. Mitarbeiter und Kunden sehen sofort, was als Nächstes ansteht.
+                        </p>
+                        <div
+                            class="landing_actions"
+                            data-hero-item
+                        >
+                            <ui-button
+                                v-if="!store.me?.loggedIn"
+                                to="/signup"
+                            >
+                                Konto erstellen
+                            </ui-button>
+                            <ui-button
+                                v-else-if="!store.me.isAdmin && !store.me.isStaff"
+                                to="/request/new"
+                            >
+                                Auftrag anlegen
+                            </ui-button>
+                            <ui-button
+                                v-if="store.me?.loggedIn && !store.me.isAdmin && !store.me.isStaff"
+                                to="/request"
+                                type="secondary"
+                            >
+                                Meine Anfragen
+                            </ui-button>
+                            <ui-button
+                                v-if="store.me?.loggedIn && (store.me.isAdmin || store.me?.isStaff)"
+                                to="/staff/request"
+                                type="primary"
+                            >
+                                Anfragen
+                            </ui-button>
+                        </div>
+                    </div>
+                    <div
+                        class="landing_hero-visual"
+                        data-hero-item
                     >
-                        Konto erstellen
-                    </ui-button>
-                    <ui-button
-                        v-else-if="!store.me.isAdmin && !store.me.isStaff"
-                        to="/request/new"
-                    >
-                        Auftrag anlegen
-                    </ui-button>
-                    <ui-button
-                        v-if="store.me?.loggedIn && !store.me.isAdmin && !store.me.isStaff"
-                        to="/request"
-                        type="secondary"
-                    >
-                        Meine Anfragen
-                    </ui-button>
-                    <ui-button
-                        v-if="store.me?.loggedIn && (store.me.isAdmin || store.me?.isStaff)"
-                        to="/staff/request"
-                        type="primary"
-                    >
-                        Anfragen
-                    </ui-button>
+                        <div class="landing_hero-frame">
+                            <img
+                                alt="Auftragsverwaltung"
+                                class="landing_hero-img"
+                                src="/docs/repair-request.png"
+                            >
+                            <div class="landing_hero-vignette"/>
+                        </div>
+                    </div>
                 </div>
             </common-neon-runner-container>
 
+            <!-- Features: bento-style — first card spans two rows -->
             <common-neon-runner-container
                 as="section"
                 class="landing_section landing_section--features"
@@ -73,20 +87,22 @@
             >
                 <h3 class="landing_section-title">Funktionen auf einen Blick</h3>
                 <p class="landing_section-subtitle">
-                    Klare Statuswechsel, direkte Kommunikation und eine lückenlose Verlaufshistorie — alles an einem Ort.
+                    Klare Statuswechsel, direkte Kommunikation und eine lückenlose Verlaufshistorie. Alles an einem Ort.
                 </p>
                 <div class="landing_feature-grid">
                     <home-feature-card
-                        v-for="feature in features"
+                        v-for="(feature, index) in features"
                         :key="feature.title"
                         :description="feature.description"
                         :icon="feature.icon"
+                        :large="index === 0"
                         :points="feature.points"
                         :title="feature.title"
                     />
                 </div>
             </common-neon-runner-container>
 
+            <!-- Previews: asymmetric — first item spans two rows -->
             <common-neon-runner-container
                 as="section"
                 class="landing_section"
@@ -94,12 +110,12 @@
                 tone="secondary"
             >
                 <h3 class="landing_section-title">Das Tool in Aktion</h3>
-
                 <div class="landing_preview-grid">
                     <home-image-placeholder
-                        v-for="preview in previews"
+                        v-for="(preview, index) in previews"
                         :key="preview.label"
                         :caption="preview.caption"
+                        :featured="index === 0"
                         :image="preview.image"
                         :label="preview.label"
                         :title="preview.title"
@@ -107,6 +123,7 @@
                 </div>
             </common-neon-runner-container>
 
+            <!-- CTA: centered -->
             <common-neon-runner-container
                 as="section"
                 class="landing_section landing_section--cta"
@@ -153,7 +170,7 @@ const features = [
     },
     {
         title: 'Direkte Kommunikation',
-        description: 'Kunden und Mitarbeiter kommunizieren über einen dedizierten Chatraum pro Auftrag — der Gesprächsverlauf geht nie verloren.',
+        description: 'Kunden und Mitarbeiter kommunizieren über einen dedizierten Chatraum pro Auftrag. Der Gesprächsverlauf bleibt immer erhalten.',
         icon: 'material-symbols:forum-rounded',
         points: [
             'Echtzeit-Nachrichten ohne Seitenaktualisierung',
@@ -177,7 +194,7 @@ const previews = [
     {
         label: 'Team',
         title: 'Team-Cockpit',
-        caption: 'Offene Aufträge, Prioritäten und aktueller Stand — auf einen Blick.',
+        caption: 'Offene Aufträge, Prioritäten und aktueller Stand. Auf einen Blick.',
         image: '/docs/repair-request.png',
     },
     {
@@ -222,8 +239,8 @@ onMounted(() => {
         });
     });
 
-    // Cursor-driven parallax layer — uses `translate` CSS individual property
-    // which composes with animejs's `transform` without conflict
+    // Cursor-driven parallax — uses CSS `translate` individual property
+    // which composes with animejs transforms without conflict
     const handlePointerMove = (e: PointerEvent) => {
         const cx = (e.clientX / window.innerWidth) - 0.5;
         const cy = (e.clientY / window.innerHeight) - 0.5;
@@ -236,7 +253,7 @@ onMounted(() => {
     root.addEventListener('pointermove', handlePointerMove, { passive: true });
     cleanupPointerMove = () => root.removeEventListener('pointermove', handlePointerMove);
 
-    // Hero entrance
+    // Hero entrance — title, subtitle, actions, then visual
     animate(heroItems, {
         opacity: [0, 1],
         translateY: [26, 0],
@@ -245,7 +262,7 @@ onMounted(() => {
         ease: 'outExpo',
     });
 
-    // Section-level reveals
+    // Section-level reveals on scroll
     const sectionObserver = new IntersectionObserver(entries => {
         entries.forEach(entry => {
             if (!entry.isIntersecting) return;
@@ -260,7 +277,7 @@ onMounted(() => {
     }, { threshold: 0.15 });
     revealSections.forEach(target => sectionObserver.observe(target));
 
-    // Feature card stagger — fires when grid enters viewport, staggers children
+    // Feature card stagger — fires when grid enters viewport
     if (featureGrid) {
         const cards = featureGrid.querySelectorAll<HTMLElement>('.home-feature-card');
         const cardObserver = new IntersectionObserver(entries => {
@@ -371,36 +388,60 @@ onUnmounted(() => {
         width: 100%;
     }
 
+    // Split hero layout
     &_hero {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
+        &-inner {
+            display: grid;
+            grid-template-columns: 3fr 2fr;
+            gap: 40px;
+            align-items: center;
+        }
 
-    &_badge {
-        width: fit-content;
-        padding: 4px 12px;
-        border: 1px solid varToRgba(info500, 0.6);
-        border-radius: 999px;
+        &-content {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
 
-        font-size: 12px;
-        color: $lightgray0;
-        letter-spacing: 0.04em;
+        &-frame {
+            position: relative;
 
-        background: linear-gradient(140deg, varToRgba(info700, 0.5), varToRgba(primary500, 0.3));
+            overflow: hidden;
+
+            border-radius: 14px;
+
+            background: $darkgray875;
+            box-shadow:
+                0 0 0 1px varToRgba(info500, 0.22),
+                0 28px 56px -20px varToRgba(info700, 0.3);
+        }
+
+        &-img {
+            display: block;
+            width: 100%;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        &-vignette {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 52%, varToRgba(darkgray900, 0.9) 100%);
+        }
     }
 
     &_title {
         margin: 0;
 
-        font-size: 42px;
+        font-size: 44px;
         line-height: 1.1;
         color: $lightgray0;
         text-wrap: balance;
     }
 
     &_subtitle {
-        max-width: 780px;
+        max-width: 520px;
         margin: 0;
 
         font-size: 16px;
@@ -447,18 +488,28 @@ onUnmounted(() => {
         text-wrap: pretty;
     }
 
-    &_feature-grid,
+    // Bento feature grid: first card spans both rows
+    &_feature-grid {
+        display: grid;
+        grid-template-columns: 1.6fr 1fr;
+        grid-template-rows: auto auto;
+        gap: 14px;
+
+        > :first-child {
+            grid-row: span 2;
+        }
+    }
+
+    // Asymmetric preview grid: first item spans both rows
     &_preview-grid {
         display: grid;
+        grid-template-columns: 1.7fr 1fr;
+        grid-template-rows: auto auto;
         gap: 14px;
-    }
 
-    &_feature-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    &_preview-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        > :first-child {
+            grid-row: span 2;
+        }
     }
 
     @media (prefers-reduced-motion: no-preference) {
@@ -466,10 +517,10 @@ onUnmounted(() => {
             opacity: 0;
         }
 
-        &_badge,
         &_title,
         &_subtitle,
-        &_actions {
+        &_actions,
+        &_hero-visual {
             opacity: 0;
         }
 
@@ -489,6 +540,14 @@ onUnmounted(() => {
     @include mobile {
         gap: 24px;
 
+        &_hero-inner {
+            grid-template-columns: 1fr;
+        }
+
+        &_hero-visual {
+            display: none;
+        }
+
         &_hero,
         &_section {
             padding: 20px;
@@ -498,11 +557,25 @@ onUnmounted(() => {
             font-size: 32px;
         }
 
-        &_feature-grid,
+        &_subtitle {
+            max-width: none;
+        }
+
+        &_feature-grid {
+            grid-template-columns: 1fr;
+
+            > :first-child {
+                grid-row: span 1;
+            }
+        }
+
         &_preview-grid {
             grid-template-columns: 1fr;
+
+            > :first-child {
+                grid-row: span 1;
+            }
         }
     }
 }
 </style>
-

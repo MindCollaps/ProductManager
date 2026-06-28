@@ -10,9 +10,10 @@
             <h2 class="work-item-editor-title">{{ title }}</h2>
 
             <common-selector
+                :key="workItemTypePath"
                 v-model="selectedWorkItemType"
                 one
-                path="/api/v1/admin/work-item-type"
+                :path="workItemTypePath"
                 title="Work Item Type"
             >
                 <template #add="{ item: workItemType }">
@@ -94,6 +95,14 @@ const props = defineProps({
         type: Number,
         default: 0,
     },
+    phaseStartOrder: {
+        type: Number as PropType<number | null>,
+        default: null,
+    },
+    phaseEndOrder: {
+        type: Number as PropType<number | null>,
+        default: null,
+    },
 });
 
 const emit = defineEmits({
@@ -103,6 +112,16 @@ const emit = defineEmits({
     save(payload: RepairWorkItemDraft) {
         return true;
     },
+});
+
+const workItemTypePath = computed(() => {
+    if (props.phaseStartOrder == null && props.phaseEndOrder == null) {
+        return '/api/v1/admin/work-item-type';
+    }
+    const params = new URLSearchParams();
+    if (props.phaseStartOrder != null) params.set('minSortOrder', String(props.phaseStartOrder));
+    if (props.phaseEndOrder != null) params.set('maxSortOrder', String(props.phaseEndOrder));
+    return `/api/v1/admin/work-item-type?${ params.toString() }`;
 });
 
 const form = reactive<RepairWorkItemDraft>({

@@ -28,6 +28,12 @@
         "value": "6px",
         "reason": "Intentional: skeleton placeholder bar uses 6px on 10px-tall element for standard pill-like skeleton appearance",
         "createdAt": "2026-06-27T08:19:21.154Z"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "16px",
+        "reason": "Matches RepairWorkItemCard card radius; user confirmed as intentional card-level radius",
+        "createdAt": "2026-06-28T22:44:25.064Z"
       }
     ]
   }

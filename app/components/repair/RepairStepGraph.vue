@@ -3,12 +3,28 @@
         <div class="step-graph-header">
             <div class="step-graph-copy">
                 <h2>Arbeitsschritte</h2>
+                <div
+                    v-if="workItems.length > 0"
+                    class="step-graph-count"
+                >
+                    <transition
+                        mode="out-in"
+                        name="stat-count"
+                    >
+                        <span
+                            :key="completedWorkItems"
+                            class="step-graph-count-num"
+                        >{{ completedWorkItems }}</span>
+                    </transition>
+                    <span class="step-graph-count-sep"> / {{ workItems.length }} erledigt</span>
+                </div>
             </div>
 
             <div class="step-graph-actions">
                 <ui-button
                     v-if="editable && request.status === 'ACCEPTED'"
-                    @click="initializeDefaultSteps"
+                    :disabled="isBusy"
+                    @click="workItems.length === 0 ? initializeDefaultSteps() : openResetConfirm()"
                 >
                     {{ workItems.length === 0 ? 'Standardschritte anlegen' : 'Zurücksetzen' }}
                 </ui-button>
@@ -37,24 +53,6 @@
             </div>
         </div>
 
-        <div class="step-graph-overview">
-            <div class="step-graph-stat">
-                <div class="step-graph-stat-value">
-                    <transition
-                        mode="out-in"
-                        name="stat-count"
-                    >
-                        <span
-                            :key="completedWorkItems"
-                            class="step-graph-stat-num"
-                        >{{ completedWorkItems }}</span>
-                    </transition>
-                    <span class="step-graph-stat-sep"> / {{ workItems.length }}</span>
-                </div>
-                <span class="step-graph-stat-label">erledigt</span>
-            </div>
-        </div>
-
         <transition name="step-graph-fade">
             <common-box v-if="workItems.length === 0">
                 <h3>Noch keine Schritte definiert</h3>
@@ -79,13 +77,15 @@
             >
                 <template #default="{ index, item }">
                     <repair-work-item-card
+                        :current-user-id="store.me?.id ?? null"
                         :editable="editable"
                         :item="item"
                         :part-orders="partOrders"
                         :style="{ '--card-i': index }"
                         @addPart="openPartPopup(item.id)"
+                        @assignSelf="assignSelfToWorkItem(item)"
                         @changePartStatus="updatePartOrderStatus"
-                        @delete="deleteWorkItem(item)"
+                        @delete="openDeleteConfirm(item)"
                         @edit="openEdit(item)"
                         @toggleDone="toggleWorkItemCompletion(item)"
                         @toggleInProgress="toggleWorkItemInProgress(item)"
@@ -99,6 +99,8 @@
             :default-order-index="editorDefaultOrderIndex"
             :is-visible="isEditorVisible"
             :item="editingItem"
+            :phase-end-order="editorPhaseEndOrder"
+            :phase-start-order="editorPhaseStartOrder"
             :title="editingItem ? 'Schritt bearbeiten' : 'Neuer Schritt'"
             @close="closeEditor"
             @save="saveWorkItem"
@@ -130,6 +132,34 @@
                 <ui-text-area v-model="partNote">Notiz</ui-text-area>
             </div>
         </common-popup>
+
+        <common-popup
+            close-text="Abbrechen"
+            :is-visible="isDeleteConfirmVisible"
+            submit-color="error600"
+            submit-text="Löschen"
+            @close="cancelDelete"
+            @submit="confirmDelete"
+        >
+            <div class="step-graph-confirm-popup">
+                <h3>Schritt löschen?</h3>
+                <p v-if="itemPendingDelete">„{{ itemPendingDelete.title }}" wird unwiderruflich gelöscht.</p>
+            </div>
+        </common-popup>
+
+        <common-popup
+            close-text="Abbrechen"
+            :is-visible="isResetConfirmVisible"
+            submit-color="error600"
+            submit-text="Zurücksetzen"
+            @close="isResetConfirmVisible = false"
+            @submit="confirmReset"
+        >
+            <div class="step-graph-confirm-popup">
+                <h3>Schritte zurücksetzen?</h3>
+                <p>Alle aktuellen Schritte werden durch die Standardschritte ersetzt. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            </div>
+        </common-popup>
     </div>
 </template>
 
@@ -141,6 +171,8 @@ import type { PartOrderResponse, PartOrderUpdatePayload } from '~~/types/parts';
 import type { PartOrderWithRelationsType, RepairRequestWithRelationsType, RepairWorkItemWithRelationsType } from '~~/types/req';
 import type { RepairWorkItemDraft } from '~~/app/utils/repairWorkItems';
 import { groupRepairWorkItemsByPhase } from '~~/app/utils/repairWorkItems';
+import { ToastMode } from '~~/types/toast';
+import { useStore } from '~/store';
 
 const props = defineProps({
     request: {
@@ -155,20 +187,30 @@ const props = defineProps({
 
 const emit = defineEmits<{ update: [] }>();
 
+const { showToast } = useToastManager();
+
 const workItems = ref<RepairWorkItemWithRelationsType[]>([]);
 const partOrders = ref<PartOrderWithRelationsType[]>([]);
 const isEditorVisible = ref(false);
 const editingItem = ref<RepairWorkItemWithRelationsType | null>(null);
 const editorDefaultOrderIndex = ref(0);
+const editorPhaseStartOrder = ref<number | null>(null);
+const editorPhaseEndOrder = ref<number | null>(null);
+const store = useStore();
 const isPartPopupVisible = ref(false);
+const isResetConfirmVisible = ref(false);
+const itemPendingDelete = ref<RepairWorkItemWithRelationsType | null>(null);
 const selectedWorkItemId = ref<string | null>(null);
 const selectedCatalogPart = ref<PartCatalog[]>([]);
 const partQuantity = ref(1);
 const partSupplier = ref('');
 const partEstimatedCost = ref<number | null>(null);
 const partNote = ref('');
+const isBusy = ref(false);
 const router = useRouter();
 const route = useRoute();
+
+const isDeleteConfirmVisible = computed(() => itemPendingDelete.value !== null);
 
 watch(() => props.request.workItems, items => {
     workItems.value = [...(items ?? [])];
@@ -191,6 +233,8 @@ const completedWorkItems = computed(() => workItems.value.filter(workItem => wor
 function closeEditor() {
     isEditorVisible.value = false;
     editingItem.value = null;
+    editorPhaseStartOrder.value = null;
+    editorPhaseEndOrder.value = null;
 }
 
 function closePartPopup() {
@@ -208,16 +252,43 @@ function openPartPopup(workItemId: string) {
     isPartPopupVisible.value = true;
 }
 
-function openCreate(orderIndex: number) {
+function openCreate(orderIndex: number, phaseEnd?: number) {
     editingItem.value = null;
     editorDefaultOrderIndex.value = orderIndex;
+    if (phaseEnd !== undefined) {
+        editorPhaseStartOrder.value = orderIndex;
+        editorPhaseEndOrder.value = phaseEnd;
+    }
+    else {
+        editorPhaseStartOrder.value = null;
+        editorPhaseEndOrder.value = null;
+    }
     isEditorVisible.value = true;
 }
 
 function openEdit(item: RepairWorkItemWithRelationsType) {
     editingItem.value = item;
     editorDefaultOrderIndex.value = item.orderIndex;
+    editorPhaseStartOrder.value = item.orderIndex;
+    editorPhaseEndOrder.value = getWorkItemPhaseEnd(item.orderIndex);
     isEditorVisible.value = true;
+}
+
+function openDeleteConfirm(item: RepairWorkItemWithRelationsType) {
+    itemPendingDelete.value = item;
+}
+
+function cancelDelete() {
+    itemPendingDelete.value = null;
+}
+
+function openResetConfirm() {
+    isResetConfirmVisible.value = true;
+}
+
+async function confirmReset() {
+    isResetConfirmVisible.value = false;
+    await initializeDefaultSteps();
 }
 
 function upsertLocalWorkItem(workItem: RepairWorkItemWithRelationsType) {
@@ -271,94 +342,147 @@ function buildPayload(draft: RepairWorkItemDraft) {
 }
 
 async function saveWorkItem(draft: RepairWorkItemDraft) {
-    const payload = buildPayload(draft);
-
-    if (editingItem.value) {
-        const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ editingItem.value.id }`, {
-            body: payload,
-            method: 'PUT',
-        });
-
-        upsertLocalWorkItem(response.data);
+    let payload: ReturnType<typeof buildPayload>;
+    try {
+        payload = buildPayload(draft);
     }
-    else {
-        const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps`, {
-            body: payload,
-            method: 'POST',
-        });
-
-        upsertLocalWorkItem(response.data);
-    }
-
-    closeEditor();
-    emit('update');
-}
-
-async function deleteWorkItem(item: RepairWorkItemWithRelationsType) {
-    const confirmed = confirm(`„${ item.title }" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`);
-
-    if (!confirmed) {
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Bitte einen Arbeitsschritttyp auswählen.' });
         return;
     }
 
-    await $fetch(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
-        method: 'DELETE',
-    });
+    try {
+        if (editingItem.value) {
+            const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ editingItem.value.id }`, {
+                body: payload,
+                method: 'PUT',
+            });
+            upsertLocalWorkItem(response.data);
+        }
+        else {
+            const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps`, {
+                body: payload,
+                method: 'POST',
+            });
+            upsertLocalWorkItem(response.data);
+        }
+        closeEditor();
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Schritt konnte nicht gespeichert werden. Bitte erneut versuchen.' });
+    }
+}
 
-    partOrders.value = partOrders.value.filter(po => po.workItemId !== item.id);
-    removeLocalWorkItem(item.id);
-    emit('update');
+async function confirmDelete() {
+    const item = itemPendingDelete.value;
+    if (!item) return;
+    itemPendingDelete.value = null;
+
+    try {
+        await $fetch(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
+            method: 'DELETE',
+        });
+        partOrders.value = partOrders.value.filter(po => po.workItemId !== item.id);
+        removeLocalWorkItem(item.id);
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Schritt konnte nicht gelöscht werden. Bitte erneut versuchen.' });
+    }
 }
 
 async function toggleWorkItemCompletion(item: RepairWorkItemWithRelationsType) {
     const completed = item.status !== 'DONE';
 
-    const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
-        body: {
-            title: item.title,
-            description: item.description ?? '',
-            orderIndex: item.orderIndex,
-            workItemTypeId: item.workItemType.id,
-            assignedStaffId: item.assignedStaff?.id ?? null,
-            laborMinutes: item.laborMinutes ?? null,
-            status: completed ? 'DONE' : 'PENDING',
-            completedAt: completed ? new Date().toISOString() : null,
-        },
-        method: 'PUT',
-    });
-
-    upsertLocalWorkItem(response.data);
-    emit('update');
+    try {
+        const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
+            body: {
+                title: item.title,
+                description: item.description ?? '',
+                orderIndex: item.orderIndex,
+                workItemTypeId: item.workItemType.id,
+                assignedStaffId: item.assignedStaff?.id ?? null,
+                laborMinutes: item.laborMinutes ?? null,
+                status: completed ? 'DONE' : 'PENDING',
+                completedAt: completed ? new Date().toISOString() : null,
+            },
+            method: 'PUT',
+        });
+        upsertLocalWorkItem(response.data);
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Status konnte nicht aktualisiert werden.' });
+    }
 }
 
 async function toggleWorkItemInProgress(item: RepairWorkItemWithRelationsType) {
     const inProgress = item.status !== 'IN_PROGRESS';
 
-    const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
-        body: {
-            title: item.title,
-            description: item.description ?? '',
-            orderIndex: item.orderIndex,
-            workItemTypeId: item.workItemType.id,
-            assignedStaffId: item.assignedStaff?.id ?? null,
-            laborMinutes: item.laborMinutes ?? null,
-            status: inProgress ? 'IN_PROGRESS' : 'PENDING',
-            completedAt: null,
-        },
-        method: 'PUT',
-    });
+    try {
+        const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
+            body: {
+                title: item.title,
+                description: item.description ?? '',
+                orderIndex: item.orderIndex,
+                workItemTypeId: item.workItemType.id,
+                assignedStaffId: item.assignedStaff?.id ?? null,
+                laborMinutes: item.laborMinutes ?? null,
+                status: inProgress ? 'IN_PROGRESS' : 'PENDING',
+                completedAt: null,
+            },
+            method: 'PUT',
+        });
+        upsertLocalWorkItem(response.data);
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Status konnte nicht aktualisiert werden.' });
+    }
+}
 
-    upsertLocalWorkItem(response.data);
-    emit('update');
+async function assignSelfToWorkItem(item: RepairWorkItemWithRelationsType) {
+    const selfId = store.me?.id;
+    if (!selfId) return;
+
+    try {
+        const response = await $fetch<{ data: RepairWorkItemWithRelationsType }>(`/api/v1/staff/request/${ props.request.id }/steps/${ item.id }`, {
+            body: {
+                title: item.title,
+                description: item.description ?? '',
+                orderIndex: item.orderIndex,
+                workItemTypeId: item.workItemType.id,
+                assignedStaffId: selfId,
+                laborMinutes: item.laborMinutes ?? null,
+                status: item.status,
+                completedAt: item.completedAt ?? null,
+            },
+            method: 'PUT',
+        });
+        upsertLocalWorkItem(response.data);
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Zuweisung konnte nicht gespeichert werden.' });
+    }
 }
 
 async function initializeDefaultSteps() {
-    const response = await $fetch<RepairWorkItemWithRelationsType[]>(`/api/v1/staff/request/${ props.request.id }/steps/defaults`, {
-        method: 'POST',
-    });
-
-    workItems.value = [...response];
-    emit('update');
+    isBusy.value = true;
+    try {
+        const response = await $fetch<RepairWorkItemWithRelationsType[]>(`/api/v1/staff/request/${ props.request.id }/steps/defaults`, {
+            method: 'POST',
+        });
+        workItems.value = [...response];
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Standardschritte konnten nicht geladen werden. Bitte erneut versuchen.' });
+    }
+    finally {
+        isBusy.value = false;
+    }
 }
 
 async function createPartOrder() {
@@ -366,24 +490,33 @@ async function createPartOrder() {
     const catalogPart = selectedCatalogPart.value[0];
 
     if (!workItemId || !catalogPart) {
+        showToast({ mode: ToastMode.Error, message: 'Bitte ein Ersatzteil aus dem Katalog auswählen.' });
         return;
     }
 
-    const response = await $fetch<PartOrderResponse>(`/api/v1/staff/request/${ props.request.id }/steps/${ workItemId }/parts`, {
-        body: {
-            catalogPartId: catalogPart.id,
-            quantity: partQuantity.value,
-            supplierName: partSupplier.value || undefined,
-            estimatedCost: partEstimatedCost.value,
-            note: partNote.value || undefined,
-            workItemId,
-        },
-        method: 'POST',
-    });
-
-    upsertLocalPartOrder(response.data);
-    closePartPopup();
-    emit('update');
+    isBusy.value = true;
+    try {
+        const response = await $fetch<PartOrderResponse>(`/api/v1/staff/request/${ props.request.id }/steps/${ workItemId }/parts`, {
+            body: {
+                catalogPartId: catalogPart.id,
+                quantity: partQuantity.value,
+                supplierName: partSupplier.value || undefined,
+                estimatedCost: partEstimatedCost.value,
+                note: partNote.value || undefined,
+                workItemId,
+            },
+            method: 'POST',
+        });
+        upsertLocalPartOrder(response.data);
+        closePartPopup();
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Ersatzteil konnte nicht hinzugefügt werden. Bitte erneut versuchen.' });
+    }
+    finally {
+        isBusy.value = false;
+    }
 }
 
 async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
@@ -391,13 +524,17 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
         status,
     };
 
-    const response = await $fetch<PartOrderResponse>(`/api/v1/staff/request/${ props.request.id }/parts/${ partId }`, {
-        body: payload,
-        method: 'PUT',
-    });
-
-    upsertLocalPartOrder(response.data);
-    emit('update');
+    try {
+        const response = await $fetch<PartOrderResponse>(`/api/v1/staff/request/${ props.request.id }/parts/${ partId }`, {
+            body: payload,
+            method: 'PUT',
+        });
+        upsertLocalPartOrder(response.data);
+        emit('update');
+    }
+    catch {
+        showToast({ mode: ToastMode.Error, message: 'Teilestatus konnte nicht aktualisiert werden.' });
+    }
 }
 </script>
 
@@ -428,12 +565,6 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
         justify-content: flex-end;
     }
 
-    &-overview {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-    }
-
     &-phases {
         display: flex;
         flex-direction: column;
@@ -456,7 +587,7 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
             align-items: baseline;
 
             font-size: 22px;
-            font-weight: 800;
+            font-weight: 700;
             line-height: 1;
             color: $typographyPrimary;
         }
@@ -466,44 +597,24 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
         }
 
         &-label {
-            font-size: 12px;
-            color: $typographyPrimary;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            font-size: 11px;
+            color: $lightgray400;
         }
     }
 
-    &-legend {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 10px;
-    }
-
-    &-legend-item {
+    &-count {
         display: flex;
-        flex-direction: column;
-        gap: 4px;
+        gap: 2px;
+        align-items: baseline;
 
-        padding: 12px 14px;
-        border: 1px solid $lightgray125;
-        border-radius: 14px;
-
-        background: rgb(255 255 255 / 3%);
-
-        &--empty {
-            opacity: 0.6;
-        }
-    }
-
-    &-legend-title {
         font-size: 13px;
-        font-weight: 700;
-        color: $typographyPrimary;
-    }
+        color: $lightgray400;
 
-    &-legend-label {
-        font-size: 12px;
-        color: $typographyPrimary;
+        &-num {
+            display: inline-block;
+            font-weight: 700;
+            color: $typographyPrimary;
+        }
     }
 
     &-part-popup {
@@ -511,6 +622,18 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
         flex-direction: column;
         gap: 12px;
         width: min(560px, 80vw);
+    }
+
+    &-confirm-popup {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: min(440px, 80vw);
+
+        p {
+            font-size: 13px;
+            color: $lightgray400;
+        }
     }
 }
 

@@ -21,18 +21,36 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
             text: 'Home',
             path: '/',
             icon: 'material-symbols:other-houses',
+            hide: store.me?.loggedIn,
         },
         {
-            text: 'Requests',
-            path: (store.me?.isStaff || store.me?.isAdmin) ? '/staff/request' : '/request',
-            icon: 'material-symbols:search',
+            text: 'Dashboard',
+            path: '/dashboard',
+            icon: 'material-symbols:dashboard',
             hide: !store.me?.loggedIn,
         },
         {
+            text: 'Requests',
+            path: '/request',
+            icon: 'material-symbols:search',
+            hide: !store.me?.loggedIn || store.me?.isAdmin || store.me?.isStaff,
+        },
+        {
+            text: 'Staff',
+            icon: 'material-symbols:person',
+            hide: !store.me?.isAdmin && !store.me?.isStaff,
+            children: [
+                 {
+            text: 'Request',
+            icon: 'material-symbols:search',
+            path: '/staff/request',
+        },
+         {
             text: 'History',
             icon: 'material-symbols:history',
-            hide: !(store.me?.isStaff || store.me?.isAdmin),
             path: '/staff/history',
+        },
+            ]
         },
         {
             text: 'Admin',
@@ -42,22 +60,22 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
                 {
                     text: 'Devices',
                     path: '/admin/device',
-                    icon: 'material-symbols:computer',
+                    icon: 'material-symbols:devices-rounded',
                 },
                 {
                     text: 'Categories',
                     path: '/admin/category',
-                    icon: 'material-symbols:list',
+                    icon: 'material-symbols:category-rounded',
                 },
                 {
                     text: 'Brands',
                     path: '/admin/brand',
-                    icon: 'material-symbols:list',
+                    icon: 'material-symbols:label-rounded',
                 },
                 {
                     text: 'Work Item Types',
                     path: '/admin/work-item-type',
-                    icon: 'material-symbols:list',
+                    icon: 'material-symbols:checklist-rounded',
                 },
                 {
                     text: 'Parts',
@@ -67,7 +85,7 @@ export const useHeaderMenu = () => computed<HeaderItem[]>(() => {
                 {
                     text: 'Config',
                     path: '/admin/config',
-                    icon: 'material-symbols:settings',
+                    icon: 'material-symbols:settings-rounded',
                 },
             ],
         },

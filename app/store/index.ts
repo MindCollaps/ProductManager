@@ -52,10 +52,11 @@ export const useStore = defineStore('index', {
                 const data = await $fetch<WebUser>('/api/v1/user/me');
                 this.me = data;
             }
-            catch (error: any) {
+            catch {
                 this.me = undefined;
                 this.notificationUnreadCount = 0;
-                if (error?.statusCode === 401 || error?.response?.status === 401) {
+                const publicRoutes = ['/', '/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
+                if (!publicRoutes.includes(useRoute().path)) {
                     navigateTo('/login');
                 }
             }
