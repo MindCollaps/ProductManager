@@ -1,5 +1,61 @@
 # Changelog
 
+## v0.5.0
+
+### Staff-Anfragendetailseite (Komplettüberarbeitung)
+- Neues Layout mit separaten Bereichen für Kundendetails, Reparaturfortschritt, Timeline und Einsparungsübersicht
+- Aktionen „Abschließen", „Ablehnen", „Stornieren" und „Archivieren" mit Bestätigungs-Popup statt direktem Auslösen
+- Hinweis, wenn noch nicht alle Arbeitsschritte abgeschlossen sind und die Anfrage daher nicht beendet werden kann
+- Gerätezuordnung: neues `RepairDeviceSelectPopup` zum Verknüpfen eines Reparaturgeräts mit einer Anfrage
+- Mitarbeiterzuweisung direkt auf der Detailseite änderbar
+- Reparaturverlauf-Timeline und Einsparungstile jetzt auch auf der Staffseite sichtbar
+
+### Startseite
+- Zeigt jetzt rollenbasierte Navigationslinks (Kunden sehen ihre Anfragen, Staff/Admin sehen die Verwaltung)
+
+### Kunden-Anfragenliste (Neu gestaltet)
+- Skelett-Ladeanimation während des Ladens
+- Leerer Zustand mit direktem Link zur neuen Anfrage
+- Fehlerbehandlung mit „Erneut versuchen"-Button
+- Kopfzeile mit „Neue Anfrage"-Button
+
+### Staff-Anfragenliste (Neu gestaltet)
+- Filterleiste: Freitextsuche nach Gerät + Statusfilter per Dropdown
+- Anzeige der Warteschlangenposition pro Anfrage
+- Skelett-Ladeanimation und Fehlerbehandlung
+- Laufender Status wird auf Basis des ersten abgeschlossenen Arbeitsschritts berechnet
+
+### Admin-Bereich (Komplettüberarbeitung)
+- Kartenraster mit `minmax(220px, 1fr)` statt fixer 10%-Breite — Karten lesbar auf allen Bildschirmbreiten
+- Erstellen-Button im Seitenkopf neben dem Titel, nicht mehr am Seitenende
+- Inline-Löschbestätigung: Zwei-Klick-Muster mit 3-Sekunden-Timeout (kein Browser-Dialog mehr)
+- Leere Zustände auf allen fünf Listenseiten
+- Aufgabentypen: Icon wird als Icon dargestellt, nicht als Rohtext
+- Alle Beschriftungen, Titel und Bestätigungen vollständig auf Deutsch
+- Formularfelder bis zu 640 px breit; nach erfolgreichem Speichern automatische Rückkehr zur Liste
+
+### Icon-Selektor
+- Neue `UiIconPicker`-Komponente mit eingebetteter Suchleiste
+- Suche läuft serverseitig gegen das lokal installierte `material-symbols`-Paket (16 336 Icons, kein externer API-Aufruf)
+- Dropdown öffnet sich nach oben, wenn unterhalb nicht genug Platz vorhanden ist
+- Aufgabentyp-Bearbeitungsseite nutzt den Selektor statt eines Freitextfelds
+
+### Konfiguration
+- `showTimelineToCustomer` ist jetzt standardmäßig aktiviert
+
+### Technische Verbesserungen
+- `useAuthFetch`: HTTP-401-Antworten lösen automatisch einen Logout aus
+- Server-CRUD-Factory (`crud()`) überarbeitet: weniger Boilerplate, klarere Generics
+- Teilekatalog-Verwaltung ausschließlich für Admins (war zuvor auch im Staff-Bereich)
+
+### Bugfixes
+- **Datenverlust:** Sort Order bei Aufgabentypen wurde beim Speichern stillschweigend verworfen (`fields[5]` in `save()` übersprungen)
+- **Race condition:** Löschen wurde nicht abgewartet vor dem Refresh auf allen fünf Admin-Listenseiten
+- **Doppelte Bestätigung:** `window.confirm()` blieb aktiv nachdem Inline-Bestätigung eingebaut wurde
+- **Selector:** Dropdown öffnete beim ersten Klick die komplette Liste; Platzhalterfarbe war unsichtbar (falsche Farb-Variable)
+
+---
+
 ## v0.0.4-alpha
 
 ### Reparaturverlauf-Timeline
