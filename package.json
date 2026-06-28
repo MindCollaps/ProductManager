@@ -2,7 +2,7 @@
   "name": "product-manager",
   "type": "module",
   "private": true,
-  "version": "0.0.4-alpha",
+  "version": "0.0.5-alpha",
   "prisma": {
     "seed": "node --import tsx prisma/seed.ts"
   },
