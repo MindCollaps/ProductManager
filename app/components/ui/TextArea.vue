@@ -93,8 +93,8 @@ const model = defineModel({ type: String, default: null });
 
 const inputRef = ref<HTMLInputElement | null>(null);
 
-const currentLength = computed(() => model.value?.length);
-const isLengthExceeded = computed(() => (currentLength.value ?? 0) > props.maxInputLength);
+const currentLength = computed(() => model.value?.length ?? 0);
+const isLengthExceeded = computed(() => currentLength.value > props.maxInputLength);
 
 defineExpose({
     input: inputRef,
@@ -152,6 +152,8 @@ defineExpose({
         width: 100%;
 
         textarea {
+            resize: none;
+
             width: 100%;
             height: v-bind(height);
             padding: 12px 0;

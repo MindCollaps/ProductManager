@@ -68,26 +68,6 @@ defineProps({
     }
 }
 
-@keyframes rotate {
-    0% {
-        transform: translate(-50%, -50%) rotateZ(0deg);
-    }
-
-    100% {
-        transform: translate(-50%, -50%) rotateZ(360deg);
-    }
-}
-
-@keyframes rotateccw {
-    0% {
-        transform: translate(-50%, -50%) rotate(0deg);
-    }
-
-    100% {
-        transform: translate(-50%, -50%) rotate(-360deg);
-    }
-}
-
 @keyframes spin {
     0%,
     100% {
@@ -120,6 +100,14 @@ defineProps({
 
     87% {
         box-shadow: .2em -.2em 0 0 currentcolor;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loader::before,
+    .loader::after {
+        box-shadow: .2em 0 0 0 currentcolor;
+        animation: none;
     }
 }
 </style>

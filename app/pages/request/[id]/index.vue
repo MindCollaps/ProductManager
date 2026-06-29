@@ -111,6 +111,7 @@ import RepairTimeline from '~/components/repair/RepairTimeline.vue';
 import { calculateRepairSavings } from '~~/app/utils/repairSavings';
 import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
+import { useSocketClient } from '~/composables/socketClient';
 
 const route = useRoute();
 const id = route.params.id as string;
@@ -120,7 +121,7 @@ const serialNumber = ref('');
 const notes = ref('');
 const repairDevice = ref<RepairDeviceWithRelationsType | null>(null);
 
-const { data: repairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/user/request/${ id }`);
+const { data: repairReq, refresh: refreshRepairReq } = useFetch<RepairRequestWithRelationsType>(`/api/v1/user/request/${ id }`);
 const { data: config } = useFetch<AppConfigResponse>('/api/v1/user/config');
 const isFirstWorkItemCompleted = computed(() => {
     const workItems = repairReq.value?.workItems ?? [];
@@ -187,6 +188,18 @@ async function openChat() {
 
     await navigateTo(`/chat/room/${ repairReq.value.id }`);
 }
+
+const socket = useSocketClient();
+onMounted(() => {
+    socket?.emit('repair:watch', { requestId: id });
+    socket?.on('repair:update', async ({ requestId }) => {
+        if (requestId === id) await refreshRepairReq();
+    });
+});
+onUnmounted(() => {
+    socket?.emit('repair:unwatch', { requestId: id });
+    socket?.off('repair:update');
+});
 </script>
 
 <style lang="scss" scoped>

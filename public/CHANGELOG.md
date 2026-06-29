@@ -1,5 +1,63 @@
 # Changelog
 
+## v0.0.7
+
+### Echtzeit-Reparaturansicht
+
+- Kunden- und Mitarbeiter-Detailseite aktualisieren sich jetzt automatisch, wenn sich der Reparaturstatus ändert – kein manuelles Neuladen mehr nötig.
+- Neue Socket.IO-Events `repair:watch` / `repair:unwatch` für gezieltes Abonnieren einer Anfrage; der Server sendet `repair:update` bei jeder Statusänderung.
+
+### Zuweisungen
+
+- **„Mir zuweisen" auf Anfragendetailseite (Staff):** Mitarbeiter können sich selbst direkt als Bearbeiter einer Anfrage eintragen, ohne den Dropdown zu öffnen.
+- **„Mir zuweisen" auf Arbeitsschritt-Karten:** Jeder Schritt zeigt einen Direktzuweisungs-Button, wenn der eingeloggte Mitarbeiter noch nicht zugewiesen ist.
+
+### Bestätigungsdialoge
+
+- **Schritt löschen:** Ersetzt `window.confirm()` durch ein Modal-Popup mit dem Schrittnamen und rotem Löschen-Button.
+- **Schritte zurücksetzen:** Neues Bestätigungs-Popup bevor alle Schritte durch Standardschritte ersetzt werden.
+- Zurücksetzen-Button ist während laufender Anfragen deaktiviert (`isBusy`).
+
+### Fehlerbehandlung
+
+- Alle Arbeitsschritt-Operationen (Speichern, Löschen, Status-Toggle) haben jetzt `try/catch` mit aussagekräftigen Toast-Fehlermeldungen.
+- Gerät-Auswahl-Popup zeigt jetzt einen Toast-Fehler, wenn das Formular ohne Geräteauswahl abgeschickt wird.
+- Arbeitsschritt-Editor zeigt einen Toast-Fehler, wenn kein Arbeitsschritttyp gewählt wurde.
+
+### Arbeitsschritttyp-Filterung
+
+- Der Arbeitsschritt-Editor filtert verfügbare Typen nach der aktuellen Phase (via `minSortOrder`/`maxSortOrder`).
+- API `GET /api/v1/admin/work-item-type` unterstützt jetzt Query-Parameter `minSortOrder` und `maxSortOrder` zur Filterung nach Phasen-Reihenfolge.
+
+### Reparatur-Timeline
+
+- Balkenbreiten werden jetzt korrekt auf den verbleibenden Platz begrenzt – kein Überlaufen mehr bei kurzen Zeiträumen.
+- Linke Position wird auf 0 geklammert, um negative Offsets zu verhindern.
+- Alle Statusfarben auf stärkere Töne angepasst, um ≥ 4,5:1 Kontrast auf weißem Text zu gewährleisten.
+- Pulsanimation des aktiven Balkens respektiert jetzt `prefers-reduced-motion`.
+- Status `ON_THE_WAY_TO_SHOP` heißt jetzt „Anfahrt" statt „Unterwegs".
+
+### Übersetzungen
+
+- Alle verbleibenden englischen Texte in Arbeitsschritt-Editor, Karten und Phasen-Übersichten ins Deutsche übersetzt: Status-Optionen, Buttons, Labels, Fehlerbeschreibungen, Phasen-Leer-Zustände.
+- `assignedStaffLabel` zeigt „Nicht zugewiesen" statt „Unassigned".
+
+### UI-Verbesserungen
+
+- Arbeitsschritt-Karten: `border-radius` auf 8 px vereinheitlicht, Verlaufshintergrund entfernt, Typografie bereinigt.
+- Einsparungen-Kachel: `border-radius` auf 8 px reduziert, Uppercase-Labels entfernt.
+- Teile-Liste in `RepairWorkItemParts`: semantisches `<ul>/<li>`-Markup, Status als Pill-Badge (Umrandung + subtiler Hintergrund), roter Abbrechen-Button für Stornierung.
+
+### Toast-System
+
+- Toast-Hintergrund jetzt im App-Dunkeldesign (`$darkgray875`), mit Rahmen statt Box-Shadow.
+- ARIA-Rollen: `role="alert"` für Fehler/Warnung, `role="status"` für Info/Erfolg.
+- Fortschrittsbalken zeigt visuell die verbleibende Anzeigedauer an; wird bei `prefers-reduced-motion` ausgeblendet.
+- Container-Layout verwendet jetzt Flexbox statt fragiler Pixelpositionierung – funktioniert korrekt mit mehrzeiligen Nachrichten.
+- Enter- und Leave-Übergänge korrigiert; smoothes Nachrücken bei Schließen via FLIP-Animation.
+
+---
+
 ## v0.0.6
 
 ### Dashboard (Komplettüberarbeitung)

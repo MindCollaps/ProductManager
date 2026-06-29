@@ -32,7 +32,7 @@ const color = defineModel<string>({
     padding: 1px;
     border: 0;
 
-    background: $primary500;
+    background: transparent;
     outline: 0;
 
     &-container {
@@ -40,7 +40,7 @@ const color = defineModel<string>({
         flex-direction: column;
     }
 
-    &_controll {
+    &_control {
         display: flex;
         gap: 16px;
         align-items: center;

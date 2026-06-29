@@ -11,12 +11,12 @@
             </div>
 
             <div class="step-phase-summary">
-                <div class="step-phase-count">{{ phase.items.length }} step{{ phase.items.length === 1 ? '' : 's' }}</div>
+                <div class="step-phase-count">{{ phase.items.length }} Schritt{{ phase.items.length === 1 ? '' : 'e' }}</div>
                 <ui-button
                     v-if="editable"
                     @click="emit('add', phase.startOrder, phase.endOrder)"
                 >
-                    Add step
+                    Schritt hinzufügen
                 </ui-button>
             </div>
         </header>
@@ -50,13 +50,13 @@
                     v-if="phase.items.length === 0"
                     class="step-phase-empty"
                 >
-                    <h4>No steps in this phase yet</h4>
-                    <p>This phase is part of the repair flow, but no work items have been created here yet.</p>
+                    <h4>Noch keine Schritte</h4>
+                    <p>Diese Phase ist Teil des Reparaturablaufs, aber es wurden noch keine Arbeitsschritte erstellt.</p>
                     <ui-button
                         v-if="editable"
                         @click="emit('add', phase.startOrder, phase.endOrder)"
                     >
-                        Add the first step
+                        Ersten Schritt hinzufügen
                     </ui-button>
                 </div>
             </div>
@@ -188,13 +188,6 @@ defineSlots<{
         color: $typographyPrimary;
 
         background: rgb(255 255 255 / 8%);
-    }
-
-    &-order-label {
-        font-size: 11px;
-        color: $typographyPrimary;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
     }
 
     &-order-items {

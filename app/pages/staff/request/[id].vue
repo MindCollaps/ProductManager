@@ -209,6 +209,7 @@ import type { AppConfigResponse } from '~~/types/config';
 import type { RepairDeviceWithRelationsType, RepairRequestWithRelationsType } from '~~/types/req';
 import { ToastMode } from '~~/types/toast';
 import { useToastManager } from '~/composables/toastManager';
+import { useSocketClient } from '~/composables/socketClient';
 import { useStore } from '~/store';
 
 const route = useRoute();
@@ -541,6 +542,18 @@ async function archiveRequest() {
 
     await syncRequestStateView();
 }
+
+const socket = useSocketClient();
+onMounted(() => {
+    socket?.emit('repair:watch', { requestId: id });
+    socket?.on('repair:update', async ({ requestId }) => {
+        if (requestId === id) await refreshRepairReq();
+    });
+});
+onUnmounted(() => {
+    socket?.emit('repair:unwatch', { requestId: id });
+    socket?.off('repair:update');
+});
 </script>
 
 <style lang="scss" scoped>

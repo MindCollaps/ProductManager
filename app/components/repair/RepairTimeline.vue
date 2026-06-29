@@ -67,7 +67,7 @@ const STATUS_LABELS: Record<RepairStatus, string> = {
     [RepairStatus.ON_THE_WAY_TO_CUSTOMER]: 'Unterwegs',
     [RepairStatus.DELIVERED]: 'Zugestellt',
     [RepairStatus.ARCHIVED]: 'Archiviert',
-    [RepairStatus.ON_THE_WAY_TO_SHOP]: 'Unterwegs',
+    [RepairStatus.ON_THE_WAY_TO_SHOP]: 'Anfahrt',
 };
 
 const sortedHistory = computed(() => [...props.history]
@@ -111,8 +111,9 @@ function barStyle(entry: StatusHistoryEntry) {
     const end = effectiveEnd(entry).getTime();
     const rangeStartMs = rangeStart.value.getTime();
 
-    const leftPct = ((start - rangeStartMs) / totalRangeMs.value) * 100;
-    const widthPct = Math.max(0.5, ((end - start) / totalRangeMs.value) * 100);
+    const leftPct = Math.max(0, ((start - rangeStartMs) / totalRangeMs.value) * 100);
+    const rawWidthPct = ((end - start) / totalRangeMs.value) * 100;
+    const widthPct = Math.max(0.5, Math.min(rawWidthPct, 100 - leftPct));
 
     return {
         left: `${ leftPct.toFixed(2) }%`,
@@ -244,16 +245,16 @@ function formatDate(date: Date): string {
             white-space: nowrap;
         }
 
-        // Status colors
-        &--ON_THE_WAY_TO_SHOP     { background: #64748b; }
-        &--RECEIVED               { background: #3b82f6; }
-        &--IN_DIAGNOSIS           { background: #f59e0b; }
-        &--WAITING_FOR_PARTS      { background: #ef4444; }
-        &--IN_REPAIR              { background: #8b5cf6; }
-        &--IN_QA                  { background: #06b6d4; }
-        &--IN_OUTGOING            { background: #14b8a6; }
-        &--ON_THE_WAY_TO_CUSTOMER { background: #66bb58; }
-        &--DELIVERED              { background: #46a92d; }
+        // Status colors — darkened to ensure white text ≥ 4.5:1 at 11px
+        &--ON_THE_WAY_TO_SHOP     { background: #475569; }
+        &--RECEIVED               { background: #1d4ed8; }
+        &--IN_DIAGNOSIS           { background: #b45309; }
+        &--WAITING_FOR_PARTS      { background: #dc2626; }
+        &--IN_REPAIR              { background: #7c3aed; }
+        &--IN_QA                  { background: #0e7490; }
+        &--IN_OUTGOING            { background: #0f766e; }
+        &--ON_THE_WAY_TO_CUSTOMER { background: #15803d; }
+        &--DELIVERED              { background: #166534; }
     }
 
     &-footer {
@@ -281,5 +282,12 @@ function formatDate(date: Date): string {
 @keyframes pulse-edge {
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .repair-timeline-bar--active::after {
+        opacity: 0.7;
+        animation: none;
+    }
 }
 </style>

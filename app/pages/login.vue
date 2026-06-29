@@ -48,8 +48,8 @@
                 >Password</ui-input-text>
                 <ui-button
                     :disabled="loading"
+                    native-type="submit"
                     tag="button"
-                    type="submit"
                 >Login</ui-button>
                 <ui-button
                     to="/forgot-password"

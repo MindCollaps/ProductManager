@@ -123,7 +123,7 @@ const cardStyle = computed(() => ({
     '--accent-color': props.item.workItemType.color ?? 'rgb(148 163 184 / 0.9)',
 }));
 
-const assignedStaffLabel = computed(() => props.item.assignedStaff?.displayName ?? props.item.assignedStaff?.username ?? 'Unassigned');
+const assignedStaffLabel = computed(() => props.item.assignedStaff?.displayName ?? props.item.assignedStaff?.username ?? 'Nicht zugewiesen');
 const itemParts = computed(() => props.partOrders.filter(partOrder => partOrder.workItemId === props.item.id));
 </script>
 

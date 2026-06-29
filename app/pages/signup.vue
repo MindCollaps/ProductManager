@@ -52,8 +52,8 @@
                 >Repeat Password</ui-input-text>
                 <ui-button
                     :disabled="loading"
+                    native-type="submit"
                     tag="button"
-                    type="submit"
                 >Signup</ui-button>
                 <ui-button
                     to="/login"

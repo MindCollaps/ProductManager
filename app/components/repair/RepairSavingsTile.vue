@@ -63,14 +63,11 @@ defineProps({
         gap: 6px;
 
         padding: 14px 16px;
-        border-radius: 12px;
+        border-radius: 8px;
 
         &-label {
             font-size: 11px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-
             opacity: 0.8;
         }
 
@@ -104,11 +101,8 @@ defineProps({
     &-breakdown-item {
         display: flex;
         justify-content: space-between;
-
-        font-size: 12px;
-        color: $typographyPrimary;
-
-        opacity: 0.7;
+        font-size: 11px;
+        color: $lightgray400;
     }
 }
 </style>

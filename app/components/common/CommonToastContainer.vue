@@ -1,11 +1,13 @@
 <template>
     <div class="toast-container">
-        <transition-group name="toast-list">
+        <transition-group
+            class="toast-stack"
+            name="toast-list"
+            tag="div"
+        >
             <common-toast
-                v-for="(toast, index) in toasts"
+                v-for="toast in toasts"
                 :key="toast.id"
-                class="toast-item"
-                :style="{ bottom: `${ (toasts.length - index - 1) * 100 + 32 }px` }"
                 :toast="toast"
                 @close="store.removeToast(toast.id)"
             />
@@ -26,17 +28,31 @@ const { toasts } = storeToRefs(store);
     position: fixed;
     z-index: 9999;
     right: 32px;
-    bottom: 0;
+    bottom: 32px;
 
+    width: 400px;
+    max-width: calc(100vw - 64px);
+}
+
+.toast-stack {
     display: flex;
     flex-direction: column;
     gap: 12px;
 }
 
-.toast-item {
-    position: fixed;
-    right: 32px;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+.toast-list-enter-active {
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.toast-list-leave-active {
+    position: absolute;
+    right: 0;
+    width: 100%;
+    transition: transform 0.2s ease-in, opacity 0.2s ease-in;
+}
+
+.toast-list-move {
+    transition: transform 0.3s ease;
 }
 
 .toast-list-enter-from {
@@ -45,7 +61,15 @@ const { toasts } = storeToRefs(store);
 }
 
 .toast-list-leave-to {
-    transform: translateX(300px);
+    transform: translateX(100%);
     opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toast-list-enter-active,
+    .toast-list-leave-active,
+    .toast-list-move {
+        transition-duration: 0.01ms !important;
+    }
 }
 </style>

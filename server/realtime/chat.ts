@@ -17,6 +17,10 @@ export function getChatRoomName(requestId: string) {
     return `chat:request:${ requestId }`;
 }
 
+export function getRepairRoomName(requestId: string) {
+    return `repair:request:${ requestId }`;
+}
+
 export function getUserRoomName(userId: string) {
     return `user:${ userId }`;
 }

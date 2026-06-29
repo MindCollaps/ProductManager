@@ -73,6 +73,10 @@ const props = defineProps({
         type: String as PropType<'M' | 'S'>,
         default: 'M',
     },
+    nativeType: {
+        type: String as PropType<'button' | 'submit' | 'reset'>,
+        default: 'button',
+    },
     href: {
         type: String,
         default: null,
@@ -120,20 +124,25 @@ defineSlots<{
 }>();
 
 const getTag = computed(() => {
-    if (props.disabled) return props.tag ?? 'div';
-    if (props.href) return 'a';
-    if (props.to) return NuxtLink;
-    return props.tag ?? 'div';
+    if (props.href && !props.disabled) return 'a';
+    if (props.to && !props.disabled) return NuxtLink;
+    return props.tag ?? 'button';
 });
 
 const getAttrs = computed(() => {
     const attrs: Record<string, any> = {};
-    if (props.to) {
+    const tag = getTag.value;
+    if (tag === NuxtLink) {
         attrs.to = props.to;
         attrs.noPrefetch = true;
     }
-    else if (props.href) attrs.href = props.href;
-
+    else if (tag === 'a') {
+        attrs.href = props.href;
+    }
+    else if (tag === 'button') {
+        attrs.type = props.nativeType;
+        if (props.disabled) attrs.disabled = true;
+    }
     return attrs;
 });
 </script>
@@ -170,7 +179,7 @@ const getAttrs = computed(() => {
     }
 
     @include pc {
-        transition: 0.3s;
+        transition: background 0.15s cubic-bezier(0.25, 1, 0.5, 1), color 0.15s cubic-bezier(0.25, 1, 0.5, 1), transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
 
         &:hover {
             background: var(--hover-color, $primary400);
@@ -178,6 +187,10 @@ const getAttrs = computed(() => {
 
         &:focus, &:active {
             background: var(--focus-color, $primary600);
+        }
+
+        &:active:not(.button--type-link, .button--disabled) {
+            transform: scale(0.97);
         }
     }
 

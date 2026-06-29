@@ -38,6 +38,7 @@
 
 <script lang="ts" setup>
 import type { Device } from '@prisma/client';
+import { ToastMode } from '~~/types/toast';
 
 const props = defineProps<{
     isVisible: boolean;
@@ -48,6 +49,7 @@ const emit = defineEmits<{
     select: [device: Device];
 }>();
 
+const { showToast } = useToastManager();
 const { data: devices } = useFetch<Device[]>('/api/v1/staff/device');
 const searchQuery = ref('');
 const selectedDevice = ref<Device | null>(null);
@@ -67,7 +69,10 @@ function handleClose() {
 }
 
 function handleSubmit() {
-    if (!selectedDevice.value) return;
+    if (!selectedDevice.value) {
+        showToast({ mode: ToastMode.Error, message: 'Bitte ein Gerät auswählen.' });
+        return;
+    }
     emit('select', selectedDevice.value);
 }
 

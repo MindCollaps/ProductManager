@@ -6,7 +6,7 @@
         <div
             class="category-color"
             :style="{
-                '--category-color': category?.color ?? '$lightgray300',
+                '--category-color': category?.color ?? '#bfbfc2',
             }"
         />
         {{ category?.slug }}

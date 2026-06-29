@@ -2,7 +2,7 @@ import type { Socket, Server } from 'socket.io';
 
 import { parseSocketCookie } from '~~/server/utils/auth';
 import { registerChatSocketHandlers } from './chatHandler';
-import { getUserRoomName } from './chat';
+import { getUserRoomName, getRepairRoomName } from './chat';
 import type {
     ClientToServerEvents,
     ServerToClientEvents,
@@ -28,6 +28,15 @@ export function initSocket(io: AppServer) {
         });
 
         registerChatSocketHandlers(io, socket);
+
+        socket.on('repair:watch', ({ requestId }) => {
+            void socket.join(getRepairRoomName(requestId));
+        });
+
+        socket.on('repair:unwatch', ({ requestId }) => {
+            void socket.leave(getRepairRoomName(requestId));
+        });
+
         emitMe(socket);
     });
 }

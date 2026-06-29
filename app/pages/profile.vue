@@ -13,7 +13,7 @@
             <div class="profile-actions">
                 <ui-button
                     type="destructive"
-                    @click="navigateTo('/logout')"
+                    @click="logout"
                 >
                     Abmelden
                 </ui-button>
@@ -32,6 +32,10 @@ const roleLabel = computed(() => {
     if (store.me?.isStaff) return 'Mitarbeiter';
     return 'Kunde';
 });
+
+function logout() {
+    return navigateTo('/logout');
+}
 </script>
 
 <style lang="scss" scoped>

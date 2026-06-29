@@ -14,28 +14,34 @@
             class="work-item-parts-empty"
         >Keine Teile zugewiesen</div>
 
-        <div
-            v-for="part in parts"
-            :key="part.id"
-            class="work-item-parts-item"
+        <ul
+            v-else
+            class="work-item-parts-list"
         >
-            <div class="work-item-parts-copy">
-                <strong>{{ part.orderedName ?? 'Unbekanntes Teil' }}</strong>
-                <span>{{ part.quantity }}×</span>
-                <span>{{ statusLabel(part.status) }}</span>
-            </div>
-            <div
-                v-if="editable"
-                class="work-item-parts-actions"
+            <li
+                v-for="part in parts"
+                :key="part.id"
+                class="work-item-parts-item"
             >
-                <ui-button
-                    v-for="status in nextStatuses(part.status)"
-                    :key="status"
-                    size="S"
-                    @click="emit('transition', part.id, status)"
-                >{{ transitionLabel(status) }}</ui-button>
-            </div>
-        </div>
+                <div class="work-item-parts-copy">
+                    <strong>{{ part.orderedName ?? 'Unbekanntes Teil' }}</strong>
+                    <span>{{ part.quantity }}×</span>
+                    <span class="work-item-parts-status">{{ statusLabel(part.status) }}</span>
+                </div>
+                <div
+                    v-if="editable"
+                    class="work-item-parts-actions"
+                >
+                    <ui-button
+                        v-for="status in nextStatuses(part.status)"
+                        :key="status"
+                        :primary-color="status === 'CANCELLED' ? 'error600' : undefined"
+                        size="S"
+                        @click="emit('transition', part.id, status)"
+                    >{{ transitionLabel(status) }}</ui-button>
+                </div>
+            </li>
+        </ul>
     </div>
 </template>
 
@@ -103,7 +109,7 @@ function nextStatuses(status: PartOrderStatus): PartOrderStatus[] {
 .work-item-parts {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 
     padding-top: 8px;
     border-top: 1px solid $lightgray125;
@@ -125,12 +131,23 @@ function nextStatuses(status: PartOrderStatus): PartOrderStatus[] {
         color: $lightgray400;
     }
 
+    &-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        margin: 0;
+        padding: 0;
+
+        list-style: none;
+    }
+
     &-item {
         display: flex;
         flex-direction: column;
         gap: 8px;
 
-        padding: 10px;
+        padding: 12px;
         border: 1px solid $lightgray125;
         border-radius: 8px;
 
@@ -140,12 +157,25 @@ function nextStatuses(status: PartOrderStatus): PartOrderStatus[] {
     &-copy {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
+        gap: 6px;
+        align-items: center;
+
+        strong {
+            font-size: 13px;
+            font-weight: 600;
+        }
 
         span {
             font-size: 11px;
             color: $lightgray400;
         }
+    }
+
+    &-status {
+        padding: 1px 6px;
+        border: 1px solid $lightgray125;
+        border-radius: 999px;
+        background: rgb(255 255 255 / 4%);
     }
 
     &-actions {

@@ -2,7 +2,8 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [
-      "public/brandkit.html"
+      "public/brandkit.html",
+      "app/components/repair/RepairTimeline.vue"
     ],
     "ignoreValues": [
       {
@@ -34,6 +35,12 @@
         "value": "16px",
         "reason": "Matches RepairWorkItemCard card radius; user confirmed as intentional card-level radius",
         "createdAt": "2026-06-28T22:44:25.064Z"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "3px",
+        "reason": "Gantt bar sits 1px inset from 4px track — intentional depth, not scale drift",
+        "createdAt": "2026-06-29T07:45:00.000Z"
       }
     ]
   }

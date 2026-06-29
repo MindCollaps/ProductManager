@@ -1,6 +1,6 @@
 <template>
     <common-popup
-        close-text="Cancel"
+        close-text="Abbrechen"
         :is-visible="isVisible"
         :submit-text="submitText"
         @close="emit('close')"
@@ -14,7 +14,7 @@
                 v-model="selectedWorkItemType"
                 one
                 :path="workItemTypePath"
-                title="Work Item Type"
+                title="Arbeitsschritttyp"
             >
                 <template #add="{ item: workItemType }">
                     {{ workItemType.name }}
@@ -28,7 +28,7 @@
                 v-model="selectedStaff"
                 one
                 path="/api/v1/staff/user"
-                title="Assigned Staff"
+                title="Zuständiger Mitarbeiter"
             >
                 <template #add="{ item: staffMember }">
                     {{ staffMember.name }}
@@ -39,17 +39,17 @@
             </common-selector>
 
             <div class="work-item-editor-row">
-                <ui-input-text v-model="form.title">Title</ui-input-text>
-                <ui-input-number v-model="form.orderIndex">Order</ui-input-number>
+                <ui-input-text v-model="form.title">Titel</ui-input-text>
+                <ui-input-number v-model="form.orderIndex">Position</ui-input-number>
             </div>
 
             <div class="work-item-editor-row">
-                <ui-input-number v-model="form.laborMinutes">Labor minutes</ui-input-number>
+                <ui-input-number v-model="form.laborMinutes">Arbeitsminuten</ui-input-number>
             </div>
 
             <div class="work-item-editor-status">
-                <div class="work-item-editor-status_label">Status</div>
-                <div class="work-item-editor-status_buttons">
+                <div class="work-item-editor-status-label">Status</div>
+                <div class="work-item-editor-status-buttons">
                     <ui-button
                         v-for="statusOption in statusOptions"
                         :key="statusOption.id"
@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <ui-text-area v-model="form.description">Description</ui-text-area>
+            <ui-text-area v-model="form.description">Beschreibung</ui-text-area>
         </div>
     </common-popup>
 </template>
@@ -85,7 +85,7 @@ const props = defineProps({
     },
     title: {
         type: String,
-        default: 'Edit work item',
+        default: '',
     },
     item: {
         type: Object as PropType<RepairWorkItemWithRelationsType | null>,
@@ -137,10 +137,10 @@ const form = reactive<RepairWorkItemDraft>({
 const selectedWorkItemType = ref<WorkItemTypeOption[]>([]);
 const selectedStaff = ref<SelectableEntry[]>([]);
 const statusOptions: Array<{ id: RepairWorkItemDraft['status']; name: string }> = [
-    { id: 'PENDING', name: 'Pending' },
-    { id: 'IN_PROGRESS', name: 'In Progress' },
-    { id: 'BLOCKED', name: 'Blocked' },
-    { id: 'DONE', name: 'Done' },
+    { id: 'PENDING', name: 'Ausstehend' },
+    { id: 'IN_PROGRESS', name: 'In Bearbeitung' },
+    { id: 'BLOCKED', name: 'Blockiert' },
+    { id: 'DONE', name: 'Erledigt' },
 ];
 
 const propsItem = toRef(() => props.item);
@@ -206,7 +206,7 @@ watch(selectedWorkItemType, () => {
     }
 });
 
-const submitText = computed(() => props.item ? 'Update' : 'Create');
+const submitText = computed(() => props.item ? 'Speichern' : 'Erstellen');
 
 function submit() {
     if (!props.item) {
@@ -250,13 +250,13 @@ function submit() {
         flex-direction: column;
         gap: 8px;
 
-        &_label {
+        &-label {
             font-size: 13px;
             font-weight: 600;
             color: $typographyPrimary;
         }
 
-        &_buttons {
+        &-buttons {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;

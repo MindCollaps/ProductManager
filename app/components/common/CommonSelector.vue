@@ -2,7 +2,7 @@
     <div
         ref="selectorRoot"
         class="selector"
-        :class="{ 'selector--focused': focused }"
+        :class="{ 'selector--focused': focused, 'selector--disabled': disabled }"
     >
         <div
             v-if="title"
@@ -12,7 +12,7 @@
         </div>
         <div
             class="selector_container"
-            @click="openDropdown"
+            @click="!disabled && openDropdown()"
         >
             <div class="selector_container_selected">
                 <template
@@ -25,6 +25,7 @@
                             name="remove"
                         />
                         <button
+                            :aria-label="`${ selectedItem.name } entfernen`"
                             class="selector_tag_remove"
                             type="button"
                             @click.stop="removeItem(selectedItem)"
@@ -36,9 +37,11 @@
             </div>
             <div class="selector_input_wrapper">
                 <button
+                    :aria-expanded="showAll || searchText.length >= 1"
+                    aria-label="Auswahl öffnen"
                     class="selector_toggle"
                     type="button"
-                    @click.stop="toggleDropdown"
+                    @click.stop="!disabled && toggleDropdown()"
                     @mousedown.prevent
                 >
                     <icon
@@ -51,43 +54,46 @@
                     ref="searchText"
                     v-model="searchText"
                     class="selector_input"
-                    :placeholder="selectedItems.length === 0 ? 'Search or click to select...' : ''"
+                    :disabled="disabled"
+                    :placeholder="selectedItems.length === 0 ? 'Suchen oder klicken…' : ''"
                     type="text"
                     @blur="onBlur"
-                    @focus="openDropdown"
+                    @focus="!disabled && openDropdown()"
                 >
             </div>
         </div>
-        <div
-            v-if="(searchText.length >= 1 || showAll) && (searchEntries?.length || showAll)"
-            class="selector_select"
-        >
-            <div class="selector_select_centerbox">
-                <template
-                    v-for="option in showAll ? leftEntries : searchEntries"
-                    :key="option.id"
-                >
-                    <div
-                        class="selector_select_item"
-                        @click="addItem(option)"
+        <transition name="dropdown">
+            <div
+                v-if="(searchText.length >= 1 || showAll) && (searchEntries?.length || showAll)"
+                class="selector_select"
+            >
+                <div class="selector_select_centerbox">
+                    <template
+                        v-for="option in showAll ? leftEntries : searchEntries"
+                        :key="option.id"
                     >
-                        <div class="selector_select_item_content">
-                            <slot
-                                :item="option"
-                                name="add"
-                            />
+                        <div
+                            class="selector_select_item"
+                            @click="addItem(option)"
+                        >
+                            <div class="selector_select_item_content">
+                                <slot
+                                    :item="option"
+                                    name="add"
+                                />
+                            </div>
+                            <div class="selector_select_item_add">+</div>
                         </div>
-                        <div class="selector_select_item_add">+</div>
+                    </template>
+                    <div
+                        v-if="searchEntries?.length === 0 && !showAll"
+                        class="selector_select_empty"
+                    >
+                        Nichts gefunden
                     </div>
-                </template>
-                <div
-                    v-if="searchEntries?.length === 0 && !showAll"
-                    class="selector_select_empty"
-                >
-                    Nothing found
                 </div>
             </div>
-        </div>
+        </transition>
     </div>
 </template>
 
@@ -415,6 +421,62 @@ function onBlur(event: FocusEvent) {
 
     &--focused .input_container {
         border-color: $primary500;
+    }
+
+    &--disabled {
+        pointer-events: none;
+        opacity: 0.5;
+
+        .selector_container {
+            cursor: default;
+        }
+    }
+
+    &_tag {
+        animation: tag-appear 0.15s cubic-bezier(0.25, 1, 0.5, 1) both;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+}
+
+.dropdown-enter-active {
+    animation: dropdown-appear 0.15s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.dropdown-leave-active {
+    animation: dropdown-appear 0.1s cubic-bezier(0.25, 1, 0.5, 1) both reverse;
+}
+
+@keyframes dropdown-appear {
+    from {
+        transform: translateY(-6px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes tag-appear {
+    from {
+        transform: scale(0.75);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dropdown-enter-active,
+    .dropdown-leave-active {
+        animation: none;
     }
 }
 </style>

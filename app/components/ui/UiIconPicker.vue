@@ -298,6 +298,24 @@ onUnmounted(() => {
 
     background: $darkgray875;
     box-shadow: 0 8px 24px rgb(0 0 0 / 40%);
+
+    animation: icon-panel-appear 0.15s cubic-bezier(0.25, 1, 0.5, 1) both;
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none;
+    }
+}
+
+@keyframes icon-panel-appear {
+    from {
+        transform: translateY(-4px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .icon-picker-search {

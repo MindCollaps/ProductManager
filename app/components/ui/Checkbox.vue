@@ -1,8 +1,13 @@
 <template>
     <div
+        :aria-checked="checked"
         class="checkbox"
         :class="{ 'checkbox--checked': checked, 'checkbox--revert': revert }"
-        @click="checked = !checked"
+        role="checkbox"
+        tabindex="0"
+        @click="toggle"
+        @keydown.enter.prevent="toggle"
+        @keydown.space.prevent="toggle"
     >
         <div class="checkbox_icon">
             <Icon
@@ -27,6 +32,10 @@ defineProps({
 defineSlots<{ default: () => any }>();
 
 const checked = defineModel({ type: Boolean, required: true });
+
+function toggle() {
+    checked.value = !checked.value;
+}
 </script>
 
 <style scoped lang="scss">
@@ -47,6 +56,12 @@ const checked = defineModel({ type: Boolean, required: true });
         flex-direction: row-reverse;
     }
 
+    &:focus-visible {
+        border-radius: 4px;
+        outline: 2px solid $primary500;
+        outline-offset: 3px;
+    }
+
     &_icon {
         display: flex;
         align-items: center;
@@ -57,12 +72,10 @@ const checked = defineModel({ type: Boolean, required: true });
         border: 1px solid $lightgray100;
         border-radius: 4px;
 
-        transition: 0.3s;
+        transition: background 0.15s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.15s cubic-bezier(0.25, 1, 0.5, 1);
 
-        svg {
-            transform: scale(0);
-            width: 10px;
-            transition: 0.3s;
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
         }
     }
 
@@ -72,9 +85,25 @@ const checked = defineModel({ type: Boolean, required: true });
             background: $primary500;
 
             svg {
-                transform: scale(1);
                 color: $lightgray150Orig;
+                animation: checkmark-appear 0.15s cubic-bezier(0.25, 1, 0.5, 1) both;
+
+                @media (prefers-reduced-motion: reduce) {
+                    animation: none;
+                }
             }
+        }
+    }
+
+    @keyframes checkmark-appear {
+        from {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        to {
+            transform: scale(1);
+            opacity: 1;
         }
     }
 }

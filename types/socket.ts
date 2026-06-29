@@ -47,18 +47,25 @@ export type NotificationBadgePayload = {
     unreadCount: number;
 };
 
+export type RepairUpdatePayload = {
+    requestId: string;
+};
+
 export interface ClientToServerEvents {
     me: () => void;
     'chat:join': (payload: ChatJoinPayload, ack: (response: ChatJoinAck) => void) => void;
     'chat:leave': (payload: ChatJoinPayload) => void;
     'chat:send': (payload: ChatSendPayload, ack: (response: ChatSendAck) => void) => void;
     'notification:sync': () => void;
+    'repair:watch': (payload: RepairUpdatePayload) => void;
+    'repair:unwatch': (payload: RepairUpdatePayload) => void;
 }
 
 export interface ServerToClientEvents {
     me: (data: SocketSession) => void;
     'chat:message': (payload: { requestId: string; message: ChatMessage }) => void;
     'notification:badge': (payload: NotificationBadgePayload) => void;
+    'repair:update': (payload: RepairUpdatePayload) => void;
     errorMessage: (message: string) => void;
     infoMessage: (message: string) => void;
     warningMessage: (message: string) => void;

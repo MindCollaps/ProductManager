@@ -571,37 +571,6 @@ async function updatePartOrderStatus(partId: string, status: PartOrderStatus) {
         gap: 18px;
     }
 
-    &-stat {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        padding: 14px 16px;
-        border: 1px solid $lightgray125;
-        border-radius: 8px;
-
-        background: linear-gradient(180deg, rgb(255 255 255 / 4%), rgb(255 255 255 / 1%));
-
-        &-value {
-            display: flex;
-            align-items: baseline;
-
-            font-size: 22px;
-            font-weight: 700;
-            line-height: 1;
-            color: $typographyPrimary;
-        }
-
-        &-num {
-            display: inline-block;
-        }
-
-        &-label {
-            font-size: 11px;
-            color: $lightgray400;
-        }
-    }
-
     &-count {
         display: flex;
         gap: 2px;

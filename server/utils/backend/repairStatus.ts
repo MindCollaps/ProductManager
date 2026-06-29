@@ -2,6 +2,8 @@ import { RepairRequestStatus, RepairStatus, RepairWorkItemStatus } from '@prisma
 
 import { createApiError } from '~~/server/utils/apiResponses';
 import { createNotification } from '~~/server/realtime/notifications';
+import { getRepairRoomName } from '~~/server/realtime/chat';
+import { socketServer } from '~~/server/plugins/socket.io.server';
 import { prisma } from '~~/server/utils/prisma';
 import { getMailConfig, sendRepairReceivedEmail, sendPackageShippedEmail } from '~~/server/utils/mail';
 
@@ -68,7 +70,7 @@ export async function setRepairStatus(requestId: string, status: RepairStatus, c
         });
     }
 
-    return prisma.repairStatusHistory.create({
+    const created = await prisma.repairStatusHistory.create({
         data: {
             requestId,
             deviceId: request.device?.id ?? null,
@@ -77,6 +79,10 @@ export async function setRepairStatus(requestId: string, status: RepairStatus, c
             createdById: createdById ?? null,
         },
     });
+
+    socketServer?.to(getRepairRoomName(requestId)).emit('repair:update', { requestId });
+
+    return created;
 }
 
 export async function getLatestRepairStatus(requestId: string) {
